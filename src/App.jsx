@@ -3,7 +3,6 @@ import Nav from './components/Nav'
 import Hero from './components/Hero'
 import Preview from './components/Preview'
 import { Marquee, Features, Workflow, Stats, OpenSource, Faq, Cta, Footer } from './components/Sections'
-import { IMAGES } from './content'
 import { prefersReducedMotion } from './hooks'
 import { useDownloadStats, useVisitorPlatform } from './components/DownloadCount'
 
@@ -24,12 +23,6 @@ function CursorGlow() {
 export default function App() {
   const stats = useDownloadStats()
   const visitor = useVisitorPlatform()
-
-  useEffect(() => {
-    let link = document.querySelector("link[rel='icon']")
-    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link) }
-    link.href = IMAGES.mark
-  }, [])
 
   return (
     <>

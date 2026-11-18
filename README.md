@@ -12,6 +12,19 @@ npm run build    # production build -> dist/
 npm run preview  # preview the production build
 ```
 
+## SEO
+
+- **Prerendering:** `npm run build` renders both pages to static HTML (`scripts/prerender.mjs`,
+  `src/entry-server.jsx`), so search engines and link previews see the full content without
+  JavaScript. React then hydrates it (`src/main.jsx`). `npm run dev` still renders client-side.
+- **Meta tags** in `index.html`: title, description, canonical URL, Open Graph + X/Twitter cards
+  with `public/og-image.jpg` (1200×630), and JSON-LD structured data (`SoftwareApplication`, free, Windows/macOS/Linux).
+- **`public/robots.txt`** and **`dist/sitemap.xml`** (generated on every build with the build date).
+- **Fonts are self-hosted** (`src/fonts.js`, @fontsource), no request to Google: faster first paint.
+
+After the first deploy, add the site to [Google Search Console](https://search.google.com/search-console)
+(domain property `dragondaw.com`, verify via DNS TXT record) and submit `https://dragondaw.com/sitemap.xml`.
+
 ## Downloads & download counter
 
 The download section has four direct buttons: **Windows x64 (.zip), Linux x64 (.tar.gz),

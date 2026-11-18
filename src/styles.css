@@ -14,7 +14,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{
-  font-family:"Bricolage Grotesque",system-ui,sans-serif;
+  font-family:"Bricolage Grotesque Variable","Bricolage Grotesque",system-ui,sans-serif;
   background:var(--ink);color:var(--paper);
   overflow-x:hidden;line-height:1.55;
 }

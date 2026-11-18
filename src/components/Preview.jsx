@@ -56,6 +56,7 @@ export default function Preview() {
           <video
             ref={videoRef}
             className="ad-video"
+            suppressHydrationWarning // prerendered as /assets/…, client builds a full URL to the same file
             src={adVideo}
             muted
             loop

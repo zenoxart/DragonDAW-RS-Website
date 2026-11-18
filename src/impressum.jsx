@@ -1,10 +1,11 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import Impressum from './components/Impressum'
+import './fonts'
 import './styles.css'
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <Impressum />
-  </StrictMode>
-)
+const root = document.getElementById('root')
+const page = <StrictMode><Impressum /></StrictMode>
+
+if (root.hasChildNodes()) hydrateRoot(root, page)
+else createRoot(root).render(page)

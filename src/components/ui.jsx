@@ -54,7 +54,7 @@ export function Equalizer({ bars = 16, className = 'eq' }) {
 /** Counts up from 0 to `to` when visible. */
 export function CountUp({ to, prefix = '', suffix = '', duration = 1400 }) {
   const [ref, inView] = useInView({ threshold: 0.6 })
-  const [val, setVal] = useState(prefersReducedMotion() ? to : 0)
+  const [val, setVal] = useState(0) // same on server and client; effect below sets the real value
   useEffect(() => {
     if (!inView || prefersReducedMotion() || to === 0) { if (inView) setVal(to); return }
     let raf
