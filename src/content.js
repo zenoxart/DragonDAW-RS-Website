@@ -9,7 +9,7 @@ export const IMAGES = {
 }
 
 export const LINKS = {
-  github: 'https://github.com/zenoxart',
+  github: 'https://github.com/zenoxart/DragonDAW-RS',
   repo: 'https://github.com/zenoxart/DragonDAW-RS',
   releases: 'https://github.com/zenoxart/DragonDAW-RS/releases',
   supportEmail: 'support@dragondaw.com',
