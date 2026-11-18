@@ -1,0 +1,112 @@
+name: Website
+
+# Builds the DragonDaw website and deploys it to https://dragondaw.com (GitHub Pages).
+# - pull requests: install, audit, build (no deploy)
+# - push to main:  build, deploy, check that dragondaw.com serves the new version
+# - every 6 hours: refresh the download counter and redeploy
+# - manual:        "Run workflow" button in the Actions tab
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: website-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SITE_DOMAIN: dragondaw.com
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Fails only on vulnerabilities in what ships to visitors (React).
+      # Build-tool advisories (dev dependencies) are reported but don't block.
+      - name: Security audit (shipped code)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Security audit (build tools, report only)
+        run: npm audit --audit-level=high || echo "::warning::Advisories in build tools, see log above"
+
+      - name: Update download counter
+        env:
+          DOWNLOAD_REPO: zenoxart/DragonDAW-RS
+          # Needed if DragonDAW-RS is private: a fine-grained token with read access
+          # to its contents, saved as the repository secret DOWNLOADS_TOKEN.
+          GITHUB_TOKEN: ${{ secrets.DOWNLOADS_TOKEN || github.token }}
+        run: node scripts/fetch-downloads.mjs
+
+      - name: Build
+        run: npm run build
+
+      # Stamp the build so the post-deploy check can tell the new version is live.
+      - name: Version stamp
+        run: echo "${{ github.sha }}" > dist/version.txt
+
+      - uses: actions/configure-pages@v5
+        if: github.event_name != 'pull_request'
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: https://${{ env.SITE_DOMAIN }}
+    env:
+      HAS_PAGES_TOKEN: ${{ secrets.PAGES_ADMIN_TOKEN != '' }}
+    steps:
+      # Optional: keeps the custom domain + HTTPS set on the Pages site.
+      # Needs a fine-grained token with "Pages: read and write" on this repo,
+      # saved as the secret PAGES_ADMIN_TOKEN. Without it, set the domain once
+      # in Settings → Pages → Custom domain.
+      - name: Ensure custom domain
+        env:
+          GH_TOKEN: ${{ secrets.PAGES_ADMIN_TOKEN }}
+        if: env.HAS_PAGES_TOKEN == 'true'
+        run: |
+          gh api -X PUT "repos/${{ github.repository }}/pages" \
+            -f cname="$SITE_DOMAIN" -F https_enforced=true \
+          || gh api -X PUT "repos/${{ github.repository }}/pages" -f cname="$SITE_DOMAIN" \
+          || echo "::warning::Could not set the custom domain via API (HTTPS may still be provisioning)"
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      # Waits for https://dragondaw.com to serve this commit (up to ~5 minutes).
+      - name: Check dragondaw.com is live
+        run: |
+          for i in $(seq 1 30); do
+            live=$(curl -fsSL --max-time 10 "https://$SITE_DOMAIN/version.txt?nocache=$RANDOM" 2>/dev/null | tr -d '[:space:]')
+            if [ "$live" = "${{ github.sha }}" ]; then
+              echo "✅ https://$SITE_DOMAIN is serving ${{ github.sha }}"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::warning::https://$SITE_DOMAIN is not serving the new version yet. Check the DNS records and Settings → Pages (see README)."
