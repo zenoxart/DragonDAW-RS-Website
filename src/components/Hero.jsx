@@ -1,8 +1,9 @@
 import { IMAGES, LINKS } from '../content'
 import { useScrollY, prefersReducedMotion } from '../hooks'
 import { Reveal, Button, Equalizer } from './ui'
+import { DownloadBadge } from './DownloadCount'
 
-export default function Hero() {
+export default function Hero({ stats }) {
   const scrollY = useScrollY()
   const parallax = prefersReducedMotion() ? 0 : Math.min(scrollY, 1200) * 0.3
 
@@ -30,6 +31,7 @@ export default function Hero() {
           </Button>
           <Button href={LINKS.github} variant="btn-ghost">★ Star on GitHub</Button>
         </Reveal>
+        <DownloadBadge stats={stats} />
         <Equalizer />
       </div>
       <a href="#features" className="scroll-hint" aria-label="Scroll down"><span /></a>

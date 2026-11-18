@@ -1,0 +1,73 @@
+name: Website
+
+# CI/CD for the DragonDaw website:
+# - pull requests: install, audit, build (no deploy)
+# - push to main:  build and deploy to GitHub Pages
+# - every 6 hours: refresh the download counter and redeploy
+# - manual:        "Run workflow" button in the Actions tab
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: website-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Fails only on vulnerabilities in what ships to visitors (React).
+      # Build-tool advisories (dev dependencies) are reported but don't block.
+      - name: Security audit (shipped code)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Security audit (build tools, report only)
+        run: npm audit --audit-level=high || echo "::warning::Advisories in build tools, see log above"
+
+      - name: Update download counter
+        env:
+          DOWNLOAD_REPO: zenoxart/DragonDAW-RS
+          # Needed if DragonDAW-RS is private: a fine-grained token with read access
+          # to its contents, saved as the repository secret DOWNLOADS_TOKEN.
+          GITHUB_TOKEN: ${{ secrets.DOWNLOADS_TOKEN || github.token }}
+        run: node scripts/fetch-downloads.mjs
+
+      - name: Build
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

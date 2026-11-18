@@ -1,2 +1,6 @@
 node_modules
 dist
+public/stats.json
+
+# raw material, not part of the site
+_VideoBeat/

@@ -11,7 +11,7 @@ export const IMAGES = {
 export const LINKS = {
   github: 'https://github.com/zenoxart',
   repo: 'https://github.com/zenoxart/DragonDAW-RS',
-  download: 'https://github.com/zenoxart',
+  download: 'https://github.com/zenoxart/DragonDAW-RS/releases/latest',
   supportEmail: 'support@dragondaw.com',
 }
 
@@ -41,12 +41,4 @@ export const FAQ = [
   { q: 'Can I contribute?', a: 'Absolutely. Open an issue, discuss an idea or submit a pull request on GitHub.' },
   { q: 'How do I get support?', a: 'Email us at', email: true },
   { q: 'Why Rust?', a: 'Rust gives the audio engine speed close to C++ while preventing whole classes of memory bugs, which means fewer crashes in the middle of a session.' },
-]
-
-export const TRACKS = [
-  { name: 'Kick', color: '#ff2d55', clips: [{ l: 0, w: 24 }, { l: 26, w: 48 }, { l: 76, w: 22 }] },
-  { name: 'Snare', color: '#ff7a00', clips: [{ l: 12, w: 36 }, { l: 52, w: 46 }] },
-  { name: 'Hats', color: '#ffd60a', clips: [{ l: 0, w: 98, kind: 'steps' }] },
-  { name: 'Bass', color: '#ff3cac', clips: [{ l: 24, w: 50, kind: 'wave' }, { l: 76, w: 22, kind: 'wave' }] },
-  { name: 'Vocals', color: '#ff4d4d', clips: [{ l: 38, w: 60, kind: 'wave' }] },
 ]

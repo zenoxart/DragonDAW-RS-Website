@@ -1,6 +1,7 @@
 import { FEATURES, STEPS, FAQ, IMAGES, LINKS } from '../content'
 import { Reveal, Button, Equalizer, CountUp } from './ui'
 import { Brand } from './Nav'
+import { AnimatedNumber } from './DownloadCount'
 
 export function Marquee() {
   const text = 'RECORD ✦ BEATS ✦ MIX ✦ MASTER ✦ OPEN SOURCE ✦ FREE FOREVER ✦ BUILT IN RUST ✦ '
@@ -70,13 +71,15 @@ export function Workflow() {
   )
 }
 
-export function Stats() {
+export function Stats({ stats }) {
   return (
     <section className="stats">
       <Reveal className="stat"><CountUp to={0} prefix="€" /><span>forever</span></Reveal>
       <Reveal className="stat" delay={1}><CountUp to={100} suffix="%" /><span>open source</span></Reveal>
       <Reveal className="stat" delay={2}><strong>4-in-1</strong><span>record · beat · mix · master</span></Reveal>
-      <Reveal className="stat" delay={3}><strong>🦀</strong><span>powered by Rust</span></Reveal>
+      {stats
+        ? <Reveal className="stat" delay={3}><strong><AnimatedNumber value={stats.downloads} /></strong><span>downloads</span></Reveal>
+        : <Reveal className="stat" delay={3}><strong>🦀</strong><span>powered by Rust</span></Reveal>}
     </section>
   )
 }
@@ -128,13 +131,16 @@ export function Faq() {
   )
 }
 
-export function Cta() {
+export function Cta({ stats }) {
   return (
     <section className="cta" id="download">
       <Reveal className="cta-inner">
         <img src={IMAGES.logo} alt="DragonDaw logo" className="cta-logo" />
         <h2>Unleash the <span className="outline">dragon.</span></h2>
         <p>Download DragonDaw and make your next track today. It's free.</p>
+        {stats && stats.downloads > 0 && (
+          <p className="cta-count">Already downloaded <strong><AnimatedNumber value={stats.downloads} /></strong> times</p>
+        )}
         <Button href={LINKS.download} variant="btn-big btn-invert" magnetic>
           Download DragonDaw <span className="arrow">↓</span>
         </Button>
