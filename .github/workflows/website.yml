@@ -48,6 +48,15 @@ jobs:
       - name: Security audit (build tools, report only)
         run: npm audit --audit-level=high || echo "::warning::Advisories in build tools, see log above"
 
+      - name: Get all-time download ledger
+        run: |
+          if git fetch --depth=1 origin stats 2>/dev/null; then
+            git show origin/stats:downloads-ledger.json > "$RUNNER_TEMP/downloads-ledger.json"
+            echo "LEDGER_FILE=$RUNNER_TEMP/downloads-ledger.json" >> "$GITHUB_ENV"
+          else
+            echo "::notice::No stats branch yet; the Download stats workflow creates it."
+          fi
+
       - name: Update download counter
         env:
           DOWNLOAD_REPO: zenoxart/DragonDAW-RS

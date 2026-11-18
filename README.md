@@ -42,8 +42,12 @@ Where the links come from:
 Shared logic: `src/lib/releases.js` (archive names must match `dragon-daw-<version>-<platform>.zip|.tar.gz`
 from the DragonDAW-RS release workflow). Run locally with `npm run stats`.
 
-Note: the `nightly` release is deleted and recreated on every build, so its downloads reset.
-Versioned releases (`v*`) keep their counts.
+**All-time count:** GitHub forgets a file's download count when the file is deleted, and the
+nightly is replaced on every DragonDAW-RS build. `.github/workflows/download-stats.yml` runs every
+15 minutes and stores the highest count ever seen for each release file in `downloads-ledger.json`
+on the `stats` branch (`scripts/update-ledger.mjs`). The site adds up the ledger plus the live
+numbers, so deleted nightlies keep counting and the total never goes down. Downloads of a nightly in
+the last minutes before it is replaced can be missed; counting starts with the first ledger run.
 
 ## CI/CD: GitHub Actions → https://dragondaw.com
 

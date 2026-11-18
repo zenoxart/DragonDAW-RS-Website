@@ -79,7 +79,7 @@ export function Stats({ stats }) {
       <Reveal className="stat" delay={1}><CountUp to={100} suffix="%" /><span>open source</span></Reveal>
       <Reveal className="stat" delay={2}><strong>4-in-1</strong><span>record · beat · mix · master</span></Reveal>
       {stats?.downloads > 0
-        ? <Reveal className="stat" delay={3}><strong><AnimatedNumber value={stats.downloads} /></strong><span>downloads</span></Reveal>
+        ? <Reveal className="stat" delay={3}><strong><AnimatedNumber value={stats.downloads} /></strong><span>all-time downloads</span></Reveal>
         : <Reveal className="stat" delay={3}><strong>🦀</strong><span>powered by Rust</span></Reveal>}
     </section>
   )

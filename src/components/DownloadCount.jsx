@@ -1,31 +1,37 @@
 import { useEffect, useState } from 'react'
 import { useInView, prefersReducedMotion } from '../hooks'
-import { fetchReleases, summarizeReleases, detectPlatform } from '../lib/releases'
+import { fetchReleases, summarizeReleases, detectPlatform, combineLedgers, ledgerTotal, LEDGER_URL } from '../lib/releases'
 
 const fmt = new Intl.NumberFormat('en-US')
 
 /**
- * Download info: count + direct links to the newest archive per platform.
- * 1. stats.json (written by CI, always available)
- * 2. live GitHub API (only works while DragonDAW-RS is public), so a brand-new
- *    nightly is linked immediately instead of after the next site rebuild.
+ * Download info: all-time count + direct links to the newest archive per platform.
+ * 1. stats.json (written by CI at deploy, always available): shown immediately
+ * 2. the ledger on the `stats` branch (updated every 15 min) and the live GitHub API:
+ *    merged in when they arrive, so new downloads and a brand-new nightly show up
+ *    without waiting for the next deploy. The number never goes down.
  */
 export function useDownloadStats() {
   const [stats, setStats] = useState(null)
   useEffect(() => {
     let cancelled = false
-    fetch('./stats.json', { cache: 'no-cache' })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((s) => { if (!cancelled && s) setStats((cur) => cur ?? s) })
-      .catch(() => {})
-    fetchReleases({ maxPages: 3 })
-      .then((releases) => {
-        const live = summarizeReleases(releases)
-        if (!cancelled && Object.keys(live.platforms).length) {
-          setStats({ ...live, updatedAt: new Date().toISOString(), live: true })
+    const json = (url, opts) => fetch(url, opts).then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+
+    const baked = json('./stats.json', { cache: 'no-cache' })
+    baked.then((s) => { if (!cancelled) setStats((cur) => cur ?? s) }).catch(() => {})
+
+    Promise.allSettled([baked, json(`${LEDGER_URL}?t=${Date.now()}`), fetchReleases({ maxPages: 3 })])
+      .then(([b, l, r]) => {
+        if (cancelled) return
+        const bakedStats = b.status === 'fulfilled' ? b.value : null
+        const ledger = combineLedgers(bakedStats?.ledger, l.status === 'fulfilled' ? l.value : null)
+        if (r.status === 'fulfilled' && r.value.length) {
+          const live = summarizeReleases(r.value, ledger)
+          setStats({ ...live, downloads: Math.max(live.downloads, bakedStats?.downloads ?? 0), updatedAt: new Date().toISOString(), live: true })
+        } else if (bakedStats) {
+          setStats({ ...bakedStats, downloads: Math.max(bakedStats.downloads ?? 0, ledgerTotal(ledger)) })
         }
       })
-      .catch(() => {})
     return () => { cancelled = true }
   }, [])
   return stats
@@ -64,7 +70,7 @@ export function DownloadBadge({ stats }) {
     <div className="dl-badge" title={stats.updatedAt ? `Updated ${new Date(stats.updatedAt).toLocaleString()}` : undefined}>
       <span className="dl-icon" aria-hidden="true">⬇</span>
       <strong><AnimatedNumber value={stats.downloads} /></strong>
-      <span>downloads</span>
+      <span>downloads all-time</span>
       {stats.latestVersion && <span className="dl-version">{stats.latestVersion}</span>}
     </div>
   )

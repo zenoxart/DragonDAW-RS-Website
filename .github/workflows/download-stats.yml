@@ -1,0 +1,64 @@
+name: Download stats
+
+# Keeps the all-time download count of DragonDaw.
+# GitHub forgets a file's download count when the file is deleted, and the nightly release
+# is replaced on every DragonDAW-RS build. Every 15 minutes this records the highest count
+# seen for each release file in downloads-ledger.json on the `stats` branch, so deleted
+# nightlies keep counting. The website adds them up (src/lib/releases.js).
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: download-stats
+  cancel-in-progress: false
+
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Check out the stats branch (created on the first run)
+        run: |
+          if git fetch --depth=1 origin stats:stats 2>/dev/null; then
+            git worktree add ledger stats
+          else
+            git worktree add --orphan -b stats ledger
+            cat > ledger/README.md <<'EOF'
+          # Download ledger
+
+          Written automatically by `.github/workflows/download-stats.yml` on `main`.
+          `downloads-ledger.json` holds the highest download count ever seen for every
+          DragonDAW-RS release file, including deleted nightlies. Don't edit by hand.
+          EOF
+          fi
+
+      - name: Update ledger
+        env:
+          DOWNLOAD_REPO: zenoxart/DragonDAW-RS
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/update-ledger.mjs ledger/downloads-ledger.json
+
+      - name: Commit if changed
+        working-directory: ledger
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No new downloads."
+            exit 0
+          fi
+          total=$(node -p "require('./downloads-ledger.json').total")
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898333+github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "Download ledger: $total all-time downloads"
+          git push origin stats

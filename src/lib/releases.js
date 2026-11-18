@@ -4,6 +4,12 @@
 export const DOWNLOAD_REPO = 'zenoxart/DragonDAW-RS'
 export const RELEASES_PAGE = `https://github.com/${DOWNLOAD_REPO}/releases`
 
+// All-time download ledger, kept on the `stats` branch of the website repo by
+// .github/workflows/download-stats.yml. GitHub forgets a file's download count when the
+// file is deleted (the nightly is replaced on every build), so the ledger remembers the
+// highest count ever seen for every release file, including deleted ones.
+export const LEDGER_URL = 'https://raw.githubusercontent.com/zenoxart/DragonDAW-RS-Website/stats/downloads-ledger.json'
+
 // Matches the archive names produced by DragonDAW-RS/.github/workflows/release.yml:
 // dragon-daw-<version>-<platform>.zip | .tar.gz
 export const PLATFORMS = [
@@ -25,16 +31,57 @@ function versionLabel(name, suffix) {
 const time = (r) => Date.parse(r.published_at || r.created_at || 0)
 
 /**
- * @param {Array} releases  GitHub API /releases response (any order)
- * @returns {{downloads:number, latestVersion:string|null, platforms:Object}}
+ * Merges the current release files into a ledger. Never lowers a count, never forgets a file.
+ * @param {Object} ledger    { assets: { [assetId]: { name, release, count, firstSeen, lastSeen } } }
+ * @param {Array} releases   GitHub API /releases response
+ * @returns {Object} a new ledger
  */
-export function summarizeReleases(releases) {
+export function mergeLedger(ledger, releases, now = new Date().toISOString()) {
+  const assets = { ...(ledger?.assets ?? {}) }
+  for (const r of releases) {
+    if (r.draft) continue
+    for (const a of r.assets ?? []) {
+      if (IGNORE.test(a.name)) continue
+      const prev = assets[a.id]
+      assets[a.id] = {
+        name: a.name,
+        release: r.tag_name,
+        count: Math.max(prev?.count ?? 0, a.download_count),
+        firstSeen: prev?.firstSeen ?? now,
+        lastSeen: now,
+      }
+    }
+  }
+  return { assets }
+}
+
+/** Sum of all counts in a ledger = all-time downloads. */
+export function ledgerTotal(ledger) {
+  return Object.values(ledger?.assets ?? {}).reduce((sum, a) => sum + a.count, 0)
+}
+
+/** Combines several ledgers (e.g. the one baked into stats.json and the live one), max per file. */
+export function combineLedgers(...ledgers) {
+  const assets = {}
+  for (const l of ledgers) {
+    for (const [id, a] of Object.entries(l?.assets ?? {})) {
+      if (!assets[id] || a.count > assets[id].count) assets[id] = a
+    }
+  }
+  return { assets }
+}
+
+/**
+ * @param {Array} releases  GitHub API /releases response (any order)
+ * @param {Object} [ledger] all-time ledger; current files are merged in
+ * @returns {{downloads:number, latestVersion:string|null, platforms:Object, ledger:Object}}
+ *          downloads = all-time total (deleted nightlies included)
+ */
+export function summarizeReleases(releases, ledger) {
   const usable = releases.filter((r) => !r.draft).sort((a, b) => time(b) - time(a))
 
-  let downloads = 0
-  for (const r of usable) {
-    for (const a of r.assets ?? []) if (!IGNORE.test(a.name)) downloads += a.download_count
-  }
+  const merged = mergeLedger(ledger, usable)
+  const downloads = ledgerTotal(merged)
 
   // For each platform: the newest release (stable or nightly) that has its archive.
   const platforms = {}
@@ -60,6 +107,7 @@ export function summarizeReleases(releases) {
   const stable = usable.find((r) => !r.prerelease)
   return {
     downloads,
+    ledger: merged,
     latestVersion: stable?.tag_name ?? null, // only stable versions get the hero badge
     platforms,
   }
