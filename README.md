@@ -12,47 +12,93 @@ npm run build    # production build -> dist/
 npm run preview  # preview the production build
 ```
 
-## Download counter
+## Downloads & download counter
 
-`scripts/fetch-downloads.mjs` adds up the download counts of all GitHub release files of
-`zenoxart/DragonDAW-RS` (checksum files excluded) and writes `public/stats.json`. The site shows
-the number in the hero, the stats row and the download section, and hides it until there is at
-least one download. Run it locally with `npm run stats` (needs `GITHUB_TOKEN` if the repo is private).
+The download section has four direct buttons: **Windows x64 (.zip), Linux x64 (.tar.gz),
+macOS Apple Silicon (.tar.gz), macOS Intel (.tar.gz)**. Each always links to the newest archive
+for that platform from `zenoxart/DragonDAW-RS` releases (stable or nightly, whichever is newer;
+if a platform's build is missing in the newest release, the previous one is used). The visitor's
+system is marked "Your system", and the hero button becomes "Download for Windows/macOS/Linux".
 
-Note: the rolling `nightly` release is deleted and recreated on every build, so its downloads
-reset each time. Versioned releases (`v*`) keep their counts.
+Where the links come from:
+1. `scripts/fetch-downloads.mjs` (runs in CI on every deploy and every 6 hours) writes
+   `public/stats.json` with the links and the total download count (checksum files excluded).
+2. In the browser the site also asks the GitHub API live, so a brand-new nightly is linked
+   immediately. If that fails (rate limit, private repo), `stats.json` is used.
 
-## CI/CD (GitHub Actions + GitHub Pages)
+Shared logic: `src/lib/releases.js` (archive names must match `dragon-daw-<version>-<platform>.zip|.tar.gz`
+from the DragonDAW-RS release workflow). Run locally with `npm run stats`.
 
-`.github/workflows/website.yml`:
+Note: the `nightly` release is deleted and recreated on every build, so its downloads reset.
+Versioned releases (`v*`) keep their counts.
+
+## CI/CD: GitHub Actions → https://dragondaw.com
+
+`.github/workflows/website.yml` builds the site and deploys it to GitHub Pages under **dragondaw.com**.
 
 | Trigger | What happens |
 |---|---|
 | Pull request | install, security audit, build (no deploy) |
-| Push to `main` | build + deploy to GitHub Pages |
+| Push to `main` | build → deploy → check that dragondaw.com serves the new commit |
 | Every 6 hours | refresh the download count + redeploy |
 | Manual | Actions tab → Website → Run workflow |
 
 `.github/dependabot.yml` opens weekly update PRs for npm packages and GitHub Actions.
 
-### One-time setup
+### 1. Push the website to GitHub
 
-1. Create a GitHub repo for the website (e.g. `zenoxart/DragonDaw-Website`) and push this folder:
-   ```bash
-   git init -b main
-   git add .
-   git commit -m "DragonDaw website"
-   git remote add origin https://github.com/zenoxart/DragonDaw-Website.git
-   git push -u origin main
-   ```
-2. In the repo: **Settings → Pages → Source: GitHub Actions**.
-3. If `DragonDAW-RS` is private: create a fine-grained token (GitHub → Settings → Developer
-   settings → Fine-grained tokens) with read access to *Contents* of `DragonDAW-RS`, and save it in
-   the website repo under **Settings → Secrets and variables → Actions** as `DOWNLOADS_TOKEN`.
-   If `DragonDAW-RS` is public, skip this.
+```bash
+git init -b main
+git add .
+git commit -m "DragonDaw website"
+git remote add origin https://github.com/zenoxart/DragonDaw-Website.git
+git push -u origin main
+```
 
-The site is then live at `https://zenoxart.github.io/DragonDaw-Website/`.
-For a custom domain like `dragondaw.com`, add it under Settings → Pages → Custom domain.
+### 2. Verify the domain (once, recommended)
+
+GitHub → your profile **Settings → Pages → Add a domain** → `dragondaw.com`.
+GitHub shows a TXT record (`_github-pages-challenge-zenoxart.dragondaw.com`). Add it at your DNS
+provider and click **Verify**. This stops anyone else from claiming the domain on GitHub Pages.
+
+### 3. DNS records (at your domain registrar / DNS provider)
+
+Delete any existing A, AAAA or CNAME records for `@` and `www` first (often parking pages), then add:
+
+| Type | Name / Host | Value |
+|---|---|---|
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| AAAA | `@` | `2606:50c0:8000::153` |
+| AAAA | `@` | `2606:50c0:8001::153` |
+| AAAA | `@` | `2606:50c0:8002::153` |
+| AAAA | `@` | `2606:50c0:8003::153` |
+| CNAME | `www` | `zenoxart.github.io` |
+| TXT | `_github-pages-challenge-zenoxart` | *(value from step 2)* |
+
+- `www` points to `zenoxart.github.io` **without** the repo name.
+- With both `@` and `www` set, GitHub redirects **www.dragondaw.com → dragondaw.com** automatically.
+- Don't add a "URL redirect / forwarding" record for `www` at the registrar; the CNAME does it.
+- If you use Cloudflare: set these records to **DNS only** (grey cloud) until HTTPS works.
+
+Check with `nslookup dragondaw.com` and `nslookup www.dragondaw.com`. DNS changes can take up to 24 h.
+
+### 4. Turn on Pages with the custom domain
+
+In the website repo: **Settings → Pages**
+- Source: **GitHub Actions**
+- Custom domain: `dragondaw.com` → Save
+- **Enforce HTTPS**: tick it once GitHub has issued the certificate (can take up to 24 h)
+
+Optional: save a fine-grained token with *Pages: read and write* on the website repo as the secret
+`PAGES_ADMIN_TOKEN`; the workflow then re-applies the custom domain and HTTPS on every deploy.
+
+### 5. Download counter token (only if DragonDAW-RS is private)
+
+Create a fine-grained token with read access to *Contents* of `DragonDAW-RS` and save it in the
+website repo as the secret `DOWNLOADS_TOKEN` (Settings → Secrets and variables → Actions).
 
 ## Ad video
 

@@ -5,7 +5,7 @@ import Preview from './components/Preview'
 import { Marquee, Features, Workflow, Stats, OpenSource, Faq, Cta, Footer } from './components/Sections'
 import { IMAGES } from './content'
 import { prefersReducedMotion } from './hooks'
-import { useDownloadStats } from './components/DownloadCount'
+import { useDownloadStats, useVisitorPlatform } from './components/DownloadCount'
 
 function CursorGlow() {
   const ref = useRef(null)
@@ -23,6 +23,7 @@ function CursorGlow() {
 
 export default function App() {
   const stats = useDownloadStats()
+  const visitor = useVisitorPlatform()
 
   useEffect(() => {
     let link = document.querySelector("link[rel='icon']")
@@ -35,7 +36,7 @@ export default function App() {
       <CursorGlow />
       <Nav />
       <main id="top">
-        <Hero stats={stats} />
+        <Hero stats={stats} visitor={visitor} />
         <Marquee />
         <Preview />
         <Features />
@@ -43,7 +44,7 @@ export default function App() {
         <Stats stats={stats} />
         <OpenSource />
         <Faq />
-        <Cta stats={stats} />
+        <Cta stats={stats} visitor={visitor} />
       </main>
       <Footer />
     </>

@@ -2,8 +2,10 @@ import { IMAGES, LINKS } from '../content'
 import { useScrollY, prefersReducedMotion } from '../hooks'
 import { Reveal, Button, Equalizer } from './ui'
 import { DownloadBadge } from './DownloadCount'
+import { primaryDownload } from './DownloadButtons'
 
-export default function Hero({ stats }) {
+export default function Hero({ stats, visitor }) {
+  const primary = primaryDownload(stats, visitor)
   const scrollY = useScrollY()
   const parallax = prefersReducedMotion() ? 0 : Math.min(scrollY, 1200) * 0.3
 
@@ -26,8 +28,8 @@ export default function Hero({ stats }) {
           mix and master in one fast, fierce studio, built in Rust.
         </Reveal>
         <Reveal className="hero-cta" delay={3}>
-          <Button href="#download" variant="btn-big" magnetic>
-            Download for free <span className="arrow">→</span>
+          <Button href={primary.href} download={primary.download} target="_self" variant="btn-big" magnetic>
+            {primary.label} <span className="arrow">{primary.download ? '↓' : '→'}</span>
           </Button>
           <Button href={LINKS.github} variant="btn-ghost">★ Star on GitHub</Button>
         </Reveal>

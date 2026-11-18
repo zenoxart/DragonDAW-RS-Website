@@ -2,6 +2,7 @@ import { FEATURES, STEPS, FAQ, IMAGES, LINKS } from '../content'
 import { Reveal, Button, Equalizer, CountUp } from './ui'
 import { Brand } from './Nav'
 import { AnimatedNumber } from './DownloadCount'
+import DownloadButtons from './DownloadButtons'
 
 export function Marquee() {
   const text = 'RECORD ✦ BEATS ✦ MIX ✦ MASTER ✦ OPEN SOURCE ✦ FREE FOREVER ✦ BUILT IN RUST ✦ '
@@ -77,7 +78,7 @@ export function Stats({ stats }) {
       <Reveal className="stat"><CountUp to={0} prefix="€" /><span>forever</span></Reveal>
       <Reveal className="stat" delay={1}><CountUp to={100} suffix="%" /><span>open source</span></Reveal>
       <Reveal className="stat" delay={2}><strong>4-in-1</strong><span>record · beat · mix · master</span></Reveal>
-      {stats
+      {stats?.downloads > 0
         ? <Reveal className="stat" delay={3}><strong><AnimatedNumber value={stats.downloads} /></strong><span>downloads</span></Reveal>
         : <Reveal className="stat" delay={3}><strong>🦀</strong><span>powered by Rust</span></Reveal>}
     </section>
@@ -131,7 +132,7 @@ export function Faq() {
   )
 }
 
-export function Cta({ stats }) {
+export function Cta({ stats, visitor }) {
   return (
     <section className="cta" id="download">
       <Reveal className="cta-inner">
@@ -141,9 +142,8 @@ export function Cta({ stats }) {
         {stats && stats.downloads > 0 && (
           <p className="cta-count">Already downloaded <strong><AnimatedNumber value={stats.downloads} /></strong> times</p>
         )}
-        <Button href={LINKS.download} variant="btn-big btn-invert" magnetic>
-          Download DragonDaw <span className="arrow">↓</span>
-        </Button>
+        <DownloadButtons stats={stats} visitor={visitor} />
+        <a className="all-releases" href={LINKS.releases} target="_blank" rel="noopener">All releases &amp; checksums →</a>
       </Reveal>
     </section>
   )

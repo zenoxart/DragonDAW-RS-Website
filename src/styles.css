@@ -224,6 +224,31 @@ details p{color:var(--muted);padding-bottom:20px;animation:fadeDown .4s var(--ea
 .cta p.cta-count{margin:-18px 0 30px;font-weight:600}
 .cta-count strong{background:var(--ink);color:var(--yellow);padding:2px 10px;border-radius:8px;font-variant-numeric:tabular-nums}
 
+/* DOWNLOAD BUTTONS */
+.dl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;max-width:980px;margin:0 auto;text-align:left}
+.dl-card{position:relative;display:flex;flex-direction:column;gap:2px;padding:22px 20px 20px;border-radius:22px;
+  background:var(--ink);color:#fff;border:3px solid var(--ink);box-shadow:6px 6px 0 var(--yellow);
+  transition:transform .2s var(--ease),box-shadow .2s var(--ease),background .2s}
+.dl-card:hover{transform:translate(-4px,-4px);box-shadow:10px 10px 0 var(--yellow);background:#1f0d11}
+.dl-card:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--yellow)}
+.dl-card.recommended{background:#fff;color:var(--ink);box-shadow:6px 6px 0 var(--ink)}
+.dl-card.recommended:hover{background:#fff;box-shadow:10px 10px 0 var(--ink)}
+.dl-card.pending{opacity:.85}
+.dl-os-icon svg{width:34px;height:34px;margin-bottom:10px}
+.dl-os{font-weight:800;font-size:1.4rem;letter-spacing:-.02em;line-height:1.1}
+.dl-arch{font-weight:600;opacity:.75}
+.dl-meta{margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:.75rem;opacity:.7;line-height:1.5}
+.dl-meta b{font-weight:500;opacity:1}
+.dl-go{position:absolute;right:16px;top:18px;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;
+  background:var(--red);color:#fff;font-weight:800;transition:transform .25s var(--ease)}
+.dl-card:hover .dl-go{transform:translateY(4px)}
+.dl-reco{position:absolute;top:-14px;left:16px;background:var(--yellow);color:var(--ink);font-size:.72rem;font-weight:800;
+  letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:8px;border:2px solid var(--ink);transform:rotate(-3deg)}
+.all-releases{display:inline-block;margin-top:30px;font-weight:700;color:#fff;border-bottom:2px solid rgba(255,255,255,.4)}
+.all-releases:hover{border-bottom-color:#fff}
+@media (max-width:1024px){.dl-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.dl-grid{grid-template-columns:1fr}}
+
 /* REVEAL */
 .reveal{opacity:0;transform:translateY(40px);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:calc(var(--d,0)*90ms)}
 .reveal.in{opacity:1;transform:none}
