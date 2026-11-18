@@ -149,13 +149,16 @@ export function Cta({ stats, visitor }) {
   )
 }
 
-export function Footer() {
+export function Footer({ root = '' }) {
   return (
     <footer className="footer">
-      <Brand />
+      <Brand root={root} />
       <div className="footer-info">
         <p>Free &amp; open-source digital audio workstation · © {new Date().getFullYear()} ZenoxArt</p>
-        <p>Support: <a className="mail-link" href={`mailto:${LINKS.supportEmail}`}>{LINKS.supportEmail}</a></p>
+        <p>
+          Support: <a className="mail-link" href={`mailto:${LINKS.supportEmail}`}>{LINKS.supportEmail}</a>
+          {' · '}<a className="footer-link" href={`${root}impressum/`}>Impressum</a>
+        </p>
       </div>
       <a href="#top" className="to-top">Back to top ↑</a>
     </footer>

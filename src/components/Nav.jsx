@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { NAV, IMAGES } from '../content'
 import { useScrollY } from '../hooks'
 
-export function Brand() {
+/** `root` is the path back to the site root: '' on the home page, '../' on /impressum/. */
+export function Brand({ root = '' }) {
   return (
-    <a href="#top" className="brand">
-      <img src={IMAGES.mark} alt="" className="brand-logo" /> Dragon<span>Daw</span>
+    <a href={root ? root : '#top'} className="brand">
+      <img src={root + IMAGES.mark.replace(/^\.\//, '')} alt="" className="brand-logo" /> Dragon<span>Daw</span>
     </a>
   )
 }
