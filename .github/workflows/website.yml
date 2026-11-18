@@ -96,7 +96,7 @@ jobs:
           || echo "::warning::Could not set the custom domain via API (HTTPS may still be provisioning)"
 
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
       # Waits for https://dragondaw.com to serve this commit (up to ~5 minutes).
       - name: Check dragondaw.com is live
