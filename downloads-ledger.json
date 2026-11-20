@@ -57,6 +57,34 @@
       "count": 3,
       "firstSeen": "2026-11-18T19:33:51.621Z",
       "lastSeen": "2026-11-20T15:34:00.996Z"
+    },
+    "773238205": {
+      "name": "dragon-daw-nightly-79b43d6-macos-x86_64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T20:33:49.312Z",
+      "lastSeen": "2026-11-20T20:33:49.312Z"
+    },
+    "773238211": {
+      "name": "dragon-daw-nightly-79b43d6-windows-x86_64.zip",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T20:33:49.312Z",
+      "lastSeen": "2026-11-20T20:33:49.312Z"
+    },
+    "773238212": {
+      "name": "dragon-daw-nightly-79b43d6-linux-x86_64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T20:33:49.312Z",
+      "lastSeen": "2026-11-20T20:33:49.312Z"
+    },
+    "773238213": {
+      "name": "dragon-daw-nightly-79b43d6-macos-arm64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T20:33:49.312Z",
+      "lastSeen": "2026-11-20T20:33:49.312Z"
     }
   }
 }
