@@ -90,6 +90,7 @@ export function summarizeReleases(releases, ledger) {
       const asset = (r.assets ?? []).find((a) => a.name.endsWith(p.suffix))
       if (asset) {
         platforms[p.id] = {
+          id: String(asset.id),
           url: asset.browser_download_url,
           version: versionLabel(asset.name, p.suffix),
           name: asset.name,

@@ -1,40 +1,100 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useInView, prefersReducedMotion } from '../hooks'
 import { fetchReleases, summarizeReleases, detectPlatform, combineLedgers, ledgerTotal, LEDGER_URL } from '../lib/releases'
 
 const fmt = new Intl.NumberFormat('en-US')
 
+const REFRESH_MS = 2 * 60 * 1000 // live API allows 60 requests/hour per visitor; this uses ≤ 30
+const PENDING_KEY = 'dragondaw.pendingDownloads'
+const FLOOR_KEY = 'dragondaw.confirmedDownloads'
+const PENDING_TTL = 6 * 60 * 60 * 1000 // a click GitHub never counts (cancelled download) stops showing after 6 h
+
+const store = {
+  get(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback } catch { return fallback } },
+  set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* private mode */ } },
+}
+
+/**
+ * Clicks GitHub hasn't counted yet. Per file: the count when first clicked (base) and the number
+ * of clicks. Once GitHub's count reaches base + clicks, the entry is done; no double counting.
+ */
+function pendingDownloads(ledger) {
+  const pending = store.get(PENDING_KEY, {})
+  let extra = 0
+  const keep = {}
+  for (const [id, p] of Object.entries(pending)) {
+    if (Date.now() - p.at > PENDING_TTL) continue
+    const counted = ledger?.assets?.[id]?.count ?? p.base
+    const left = p.base + p.clicks - counted
+    if (left > 0) { extra += left; keep[id] = p }
+  }
+  store.set(PENDING_KEY, keep)
+  return extra
+}
+
 /**
  * Download info: all-time count + direct links to the newest archive per platform.
- * 1. stats.json (written by CI at deploy, always available): shown immediately
- * 2. the ledger on the `stats` branch (updated every 15 min) and the live GitHub API:
- *    merged in when they arrive, so new downloads and a brand-new nightly show up
- *    without waiting for the next deploy. The number never goes down.
+ * 1. stats.json (written by CI at deploy): shown immediately
+ * 2. the ledger on the `stats` branch (updated every 5 min) + the live GitHub API, merged in
+ *    when they arrive and refreshed every 2 minutes while the page is open
+ * 3. the visitor's own clicks count immediately (until GitHub has counted them)
+ * The confirmed number never goes down: it's the max of everything ever seen, also per browser.
+ *
+ * Returns [stats, registerDownload]; call registerDownload(file) when a download link is clicked.
  */
 export function useDownloadStats() {
-  const [stats, setStats] = useState(null)
+  const [data, setData] = useState(null) // { ...summary, confirmed, ledger }
+  const [, setTick] = useState(0)
+
   useEffect(() => {
     let cancelled = false
     const json = (url, opts) => fetch(url, opts).then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+    const baked = json('./stats.json', { cache: 'no-cache' }).catch(() => null)
 
-    const baked = json('./stats.json', { cache: 'no-cache' })
-    baked.then((s) => { if (!cancelled) setStats((cur) => cur ?? s) }).catch(() => {})
-
-    Promise.allSettled([baked, json(`${LEDGER_URL}?t=${Date.now()}`), fetchReleases({ maxPages: 3 })])
-      .then(([b, l, r]) => {
-        if (cancelled) return
-        const bakedStats = b.status === 'fulfilled' ? b.value : null
-        const ledger = combineLedgers(bakedStats?.ledger, l.status === 'fulfilled' ? l.value : null)
-        if (r.status === 'fulfilled' && r.value.length) {
-          const live = summarizeReleases(r.value, ledger)
-          setStats({ ...live, downloads: Math.max(live.downloads, bakedStats?.downloads ?? 0), updatedAt: new Date().toISOString(), live: true })
-        } else if (bakedStats) {
-          setStats({ ...bakedStats, downloads: Math.max(bakedStats.downloads ?? 0, ledgerTotal(ledger)) })
-        }
+    const apply = (summary, ledger) => {
+      if (cancelled || !summary) return
+      setData((cur) => {
+        const confirmed = Math.max(summary.downloads ?? 0, cur?.confirmed ?? 0, store.get(FLOOR_KEY, 0))
+        store.set(FLOOR_KEY, confirmed)
+        return { ...(cur ?? {}), ...summary, confirmed, ledger: combineLedgers(cur?.ledger, ledger) }
       })
-    return () => { cancelled = true }
+    }
+
+    baked.then((s) => s && apply(s, s.ledger))
+
+    const load = async () => {
+      const [b, l, r] = await Promise.allSettled([baked, json(`${LEDGER_URL}?t=${Date.now()}`), fetchReleases({ maxPages: 3 })])
+      const bakedStats = b.status === 'fulfilled' ? b.value : null
+      const ledger = combineLedgers(bakedStats?.ledger, l.status === 'fulfilled' ? l.value : null)
+      if (r.status === 'fulfilled' && r.value.length) {
+        const live = summarizeReleases(r.value, ledger)
+        apply({ ...live, updatedAt: new Date().toISOString(), live: true }, live.ledger)
+      } else if (bakedStats || Object.keys(ledger.assets).length) {
+        apply({ ...(bakedStats ?? {}), downloads: Math.max(bakedStats?.downloads ?? 0, ledgerTotal(ledger)) }, ledger)
+      }
+    }
+
+    load()
+    const timer = setInterval(() => { if (document.visibilityState === 'visible') load() }, REFRESH_MS)
+    const onVisible = () => { if (document.visibilityState === 'visible') load() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => { cancelled = true; clearInterval(timer); document.removeEventListener('visibilitychange', onVisible) }
   }, [])
-  return stats
+
+  const registerDownload = useCallback((file) => {
+    if (!file?.id) return
+    const pending = store.get(PENDING_KEY, {})
+    const counted = data?.ledger?.assets?.[file.id]?.count ?? 0
+    const p = pending[file.id]
+    pending[file.id] = p && Date.now() - p.at < PENDING_TTL
+      ? { ...p, clicks: p.clicks + 1, at: Date.now() }
+      : { base: counted, clicks: 1, at: Date.now() }
+    store.set(PENDING_KEY, pending)
+    setTick((t) => t + 1)
+  }, [data])
+
+  const stats = data ? { ...data, downloads: data.confirmed + pendingDownloads(data.ledger) } : null
+  return [stats, registerDownload]
 }
 
 export function useVisitorPlatform() {

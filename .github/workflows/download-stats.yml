@@ -2,13 +2,13 @@ name: Download stats
 
 # Keeps the all-time download count of DragonDaw.
 # GitHub forgets a file's download count when the file is deleted, and the nightly release
-# is replaced on every DragonDAW-RS build. Every 15 minutes this records the highest count
+# is replaced on every DragonDAW-RS build. Every 5 minutes this records the highest count
 # seen for each release file in downloads-ledger.json on the `stats` branch, so deleted
 # nightlies keep counting. The website adds them up (src/lib/releases.js).
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:

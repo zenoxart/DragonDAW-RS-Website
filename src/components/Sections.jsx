@@ -132,7 +132,7 @@ export function Faq() {
   )
 }
 
-export function Cta({ stats, visitor }) {
+export function Cta({ stats, visitor, onDownload }) {
   return (
     <section className="cta" id="download">
       <Reveal className="cta-inner">
@@ -142,7 +142,7 @@ export function Cta({ stats, visitor }) {
         {stats && stats.downloads > 0 && (
           <p className="cta-count">Already downloaded <strong><AnimatedNumber value={stats.downloads} /></strong> times</p>
         )}
-        <DownloadButtons stats={stats} visitor={visitor} />
+        <DownloadButtons stats={stats} visitor={visitor} onDownload={onDownload} />
         <a className="all-releases" href={LINKS.releases} target="_blank" rel="noopener">All releases &amp; checksums →</a>
       </Reveal>
     </section>

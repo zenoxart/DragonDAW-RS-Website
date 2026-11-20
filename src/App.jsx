@@ -21,7 +21,7 @@ function CursorGlow() {
 }
 
 export default function App() {
-  const stats = useDownloadStats()
+  const [stats, registerDownload] = useDownloadStats()
   const visitor = useVisitorPlatform()
 
   return (
@@ -29,7 +29,7 @@ export default function App() {
       <CursorGlow />
       <Nav />
       <main id="top">
-        <Hero stats={stats} visitor={visitor} />
+        <Hero stats={stats} visitor={visitor} onDownload={registerDownload} />
         <Marquee />
         <Preview />
         <Features />
@@ -37,7 +37,7 @@ export default function App() {
         <Stats stats={stats} />
         <OpenSource />
         <Faq />
-        <Cta stats={stats} visitor={visitor} />
+        <Cta stats={stats} visitor={visitor} onDownload={registerDownload} />
       </main>
       <Footer />
     </>

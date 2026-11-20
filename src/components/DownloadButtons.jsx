@@ -13,7 +13,7 @@ const ICONS = {
 }
 
 /** Four direct-download buttons, always pointing at the newest archive per platform. */
-export default function DownloadButtons({ stats, visitor }) {
+export default function DownloadButtons({ stats, visitor, onDownload }) {
   const platforms = stats?.platforms ?? {}
   return (
     <div className="dl-grid">
@@ -28,6 +28,7 @@ export default function DownloadButtons({ stats, visitor }) {
             className={`dl-card ${recommended ? 'recommended' : ''} ${file ? '' : 'pending'}`}
             href={file ? file.url : RELEASES_PAGE}
             {...(file ? { download: file.name } : { target: '_blank', rel: 'noopener' })}
+            onClick={() => file && onDownload?.(file)}
           >
             {recommended && <span className="dl-reco">Your system</span>}
             <span className="dl-os-icon">{icon}</span>
@@ -51,7 +52,7 @@ export function primaryDownload(stats, visitor) {
   const file = visitor && stats?.platforms?.[visitor]
   const p = PLATFORMS.find((x) => x.id === visitor)
   if (file && p) {
-    return { href: file.url, label: `Download for ${p.os}${p.os === 'macOS' ? ` (${p.arch})` : ''}`, download: file.name }
+    return { href: file.url, label: `Download for ${p.os}${p.os === 'macOS' ? ` (${p.arch})` : ''}`, download: file.name, file }
   }
   return { href: '#download', label: 'Download for free' }
 }

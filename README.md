@@ -44,9 +44,11 @@ from the DragonDAW-RS release workflow). Run locally with `npm run stats`.
 
 **All-time count:** GitHub forgets a file's download count when the file is deleted, and the
 nightly is replaced on every DragonDAW-RS build. `.github/workflows/download-stats.yml` runs every
-15 minutes and stores the highest count ever seen for each release file in `downloads-ledger.json`
+5 minutes and stores the highest count ever seen for each release file in `downloads-ledger.json`
 on the `stats` branch (`scripts/update-ledger.mjs`). The site adds up the ledger plus the live
-numbers, so deleted nightlies keep counting and the total never goes down. Downloads of a nightly in
+numbers, so deleted nightlies keep counting and the total never goes down. An open page refreshes
+every 2 minutes; a visitor's own click shows up immediately (kept in their browser until GitHub has
+counted it, so it's never counted twice). Downloads of a nightly in
 the last minutes before it is replaced can be missed; counting starts with the first ledger run.
 
 ## CI/CD: GitHub Actions → https://dragondaw.com
