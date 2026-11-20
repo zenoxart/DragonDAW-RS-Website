@@ -113,6 +113,34 @@
       "count": 0,
       "firstSeen": "2026-11-20T21:57:07.526Z",
       "lastSeen": "2026-11-20T22:12:09.266Z"
+    },
+    "773529416": {
+      "name": "dragon-daw-nightly-e6351fd-windows-x86_64.zip",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T22:23:18.453Z",
+      "lastSeen": "2026-11-20T22:23:18.453Z"
+    },
+    "773529417": {
+      "name": "dragon-daw-nightly-e6351fd-macos-arm64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T22:23:18.453Z",
+      "lastSeen": "2026-11-20T22:23:18.453Z"
+    },
+    "773529419": {
+      "name": "dragon-daw-nightly-e6351fd-macos-x86_64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T22:23:18.453Z",
+      "lastSeen": "2026-11-20T22:23:18.453Z"
+    },
+    "773529420": {
+      "name": "dragon-daw-nightly-e6351fd-linux-x86_64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T22:23:18.453Z",
+      "lastSeen": "2026-11-20T22:23:18.453Z"
     }
   }
 }
