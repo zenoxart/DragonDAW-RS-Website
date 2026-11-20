@@ -85,6 +85,34 @@
       "count": 1,
       "firstSeen": "2026-11-20T20:33:49.312Z",
       "lastSeen": "2026-11-20T21:05:35.436Z"
+    },
+    "773473425": {
+      "name": "dragon-daw-nightly-f566dbc-windows-x86_64.zip",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T21:57:07.526Z",
+      "lastSeen": "2026-11-20T21:57:07.526Z"
+    },
+    "773473428": {
+      "name": "dragon-daw-nightly-f566dbc-macos-arm64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T21:57:07.526Z",
+      "lastSeen": "2026-11-20T21:57:07.526Z"
+    },
+    "773473430": {
+      "name": "dragon-daw-nightly-f566dbc-macos-x86_64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T21:57:07.526Z",
+      "lastSeen": "2026-11-20T21:57:07.526Z"
+    },
+    "773473443": {
+      "name": "dragon-daw-nightly-f566dbc-linux-x86_64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-20T21:57:07.526Z",
+      "lastSeen": "2026-11-20T21:57:07.526Z"
     }
   }
 }
