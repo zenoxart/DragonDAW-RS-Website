@@ -1,6 +1,6 @@
 {
   "repo": "zenoxart/DragonDAW-RS",
-  "total": 48,
+  "total": 50,
   "assets": {
     "764048390": {
       "name": "dragon-daw-nightly-18cafde-linux-x86_64.tar.gz",
@@ -201,30 +201,30 @@
     "775534956": {
       "name": "dragon-daw-nightly-e81e618-windows-x86_64.zip",
       "release": "nightly",
-      "count": 0,
+      "count": 1,
       "firstSeen": "2026-11-21T12:37:34.338Z",
-      "lastSeen": "2026-11-21T12:37:34.338Z"
+      "lastSeen": "2026-11-21T12:47:20.622Z"
     },
     "775534961": {
       "name": "dragon-daw-nightly-e81e618-macos-x86_64.tar.gz",
       "release": "nightly",
       "count": 0,
       "firstSeen": "2026-11-21T12:37:34.338Z",
-      "lastSeen": "2026-11-21T12:37:34.338Z"
+      "lastSeen": "2026-11-21T12:47:20.622Z"
     },
     "775534973": {
       "name": "dragon-daw-nightly-e81e618-linux-x86_64.tar.gz",
       "release": "nightly",
-      "count": 0,
+      "count": 1,
       "firstSeen": "2026-11-21T12:37:34.338Z",
-      "lastSeen": "2026-11-21T12:37:34.338Z"
+      "lastSeen": "2026-11-21T12:47:20.622Z"
     },
     "775534981": {
       "name": "dragon-daw-nightly-e81e618-macos-arm64.tar.gz",
       "release": "nightly",
       "count": 0,
       "firstSeen": "2026-11-21T12:37:34.338Z",
-      "lastSeen": "2026-11-21T12:37:34.338Z"
+      "lastSeen": "2026-11-21T12:47:20.622Z"
     }
   }
 }
