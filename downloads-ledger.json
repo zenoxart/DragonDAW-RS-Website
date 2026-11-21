@@ -197,6 +197,34 @@
       "count": 1,
       "firstSeen": "2026-11-21T11:54:15.235Z",
       "lastSeen": "2026-11-21T12:12:44.863Z"
+    },
+    "775534956": {
+      "name": "dragon-daw-nightly-e81e618-windows-x86_64.zip",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-21T12:37:34.338Z",
+      "lastSeen": "2026-11-21T12:37:34.338Z"
+    },
+    "775534961": {
+      "name": "dragon-daw-nightly-e81e618-macos-x86_64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-21T12:37:34.338Z",
+      "lastSeen": "2026-11-21T12:37:34.338Z"
+    },
+    "775534973": {
+      "name": "dragon-daw-nightly-e81e618-linux-x86_64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-21T12:37:34.338Z",
+      "lastSeen": "2026-11-21T12:37:34.338Z"
+    },
+    "775534981": {
+      "name": "dragon-daw-nightly-e81e618-macos-arm64.tar.gz",
+      "release": "nightly",
+      "count": 0,
+      "firstSeen": "2026-11-21T12:37:34.338Z",
+      "lastSeen": "2026-11-21T12:37:34.338Z"
     }
   }
 }
