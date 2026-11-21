@@ -1,4 +1,35 @@
-import { PLATFORMS, RELEASES_PAGE, formatSize } from '../lib/releases'
+import { PLATFORMS, RELEASES_PAGE, formatSize, resolveDownload } from '../lib/releases'
+
+/**
+ * Click handler for every download button. Decides at click time which file exists *now*
+ * (newest GitHub upload, else the download mirror), so a link can never point at a nightly
+ * that has been deleted in the meantime. Ctrl/Cmd/middle clicks keep the browser's default.
+ */
+export async function startDownload(event, platformId, stats, onDownload) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  event.preventDefault()
+  const el = event.currentTarget
+  if (el.dataset.busy) return
+  el.dataset.busy = '1'
+  el.classList.add('resolving')
+  try {
+    const file = await resolveDownload(platformId, [stats?.mirror])
+    if (file) {
+      onDownload?.(file)
+      window.location.assign(file.url)
+    } else {
+      window.location.assign(RELEASES_PAGE)
+    }
+  } finally {
+    delete el.dataset.busy
+    el.classList.remove('resolving')
+  }
+}
+
+/** Link for right-click "copy link" / new-tab: the mirror copy outlives the current nightly. */
+export function stableHref(platformId, stats) {
+  return stats?.mirror?.platforms?.[platformId]?.url ?? stats?.platforms?.[platformId]?.url ?? RELEASES_PAGE
+}
 
 const ICONS = {
   windows: (
@@ -26,9 +57,8 @@ export default function DownloadButtons({ stats, visitor, onDownload }) {
           <a
             key={p.id}
             className={`dl-card ${recommended ? 'recommended' : ''} ${file ? '' : 'pending'}`}
-            href={file ? file.url : RELEASES_PAGE}
-            {...(file ? { download: file.name } : { target: '_blank', rel: 'noopener' })}
-            onClick={() => file && onDownload?.(file)}
+            href={stableHref(p.id, stats)}
+            onClick={(e) => startDownload(e, p.id, stats, onDownload)}
           >
             {recommended && <span className="dl-reco">Your system</span>}
             <span className="dl-os-icon">{icon}</span>
@@ -52,7 +82,7 @@ export function primaryDownload(stats, visitor) {
   const file = visitor && stats?.platforms?.[visitor]
   const p = PLATFORMS.find((x) => x.id === visitor)
   if (file && p) {
-    return { href: file.url, label: `Download for ${p.os}${p.os === 'macOS' ? ` (${p.arch})` : ''}`, download: file.name, file }
+    return { href: stableHref(visitor, stats), label: `Download for ${p.os}${p.os === 'macOS' ? ` (${p.arch})` : ''}`, platformId: visitor }
   }
   return { href: '#download', label: 'Download for free' }
 }

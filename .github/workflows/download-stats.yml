@@ -43,9 +43,39 @@ jobs:
           EOF
           fi
 
+      # Copies the newest *complete* nightly of DragonDAW-RS to a `mirror-<version>` release here,
+      # so a download link always works, even while the nightly is being rebuilt.
+      # The previous mirrors are only removed after the new one is fully uploaded (keeps 3).
+      - name: Mirror the newest nightly
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SRC: zenoxart/DragonDAW-RS
+          KEEP: 3
+        run: |
+          nightly=$(gh api "repos/$SRC/releases/tags/nightly" 2>/dev/null) || { echo "No nightly right now (being rebuilt?). Mirror unchanged."; exit 0; }
+          ready=$(jq '[.assets[] | select(.state == "uploaded") | .name
+                       | select(test("-(windows-x86_64\\.zip|linux-x86_64\\.tar\\.gz|macos-arm64\\.tar\\.gz|macos-x86_64\\.tar\\.gz)$"))] | length' <<<"$nightly")
+          if [ "$ready" -lt 4 ]; then echo "Nightly not complete yet ($ready/4 files). Mirror unchanged."; exit 0; fi
+          version=$(jq -r '.assets[].name | select(endswith("-windows-x86_64.zip")) | sub("^dragon-daw-"; "") | sub("-windows-x86_64\\.zip$"; "")' <<<"$nightly")
+          tag="mirror-$version"
+          if gh release view "$tag" >/dev/null 2>&1; then echo "Mirror $tag is up to date."; exit 0; fi
+
+          mkdir -p mirror
+          gh release download nightly -R "$SRC" -D mirror -p '*.zip' -p '*.tar.gz' -p 'SHA256SUMS*'
+          ls -la mirror
+          gh release create "$tag" mirror/* --prerelease --latest=false \
+            --title "Download mirror: DragonDaw $version" \
+            --notes "Automatic copy of the DragonDAW-RS nightly \`$version\` so downloads on dragondaw.com keep working while the nightly is rebuilt. Source: https://github.com/$SRC/releases/tag/nightly"
+          echo "Created $tag"
+
+          gh release list --limit 100 --json tagName,createdAt \
+            --jq "[.[] | select(.tagName | startswith(\"mirror-\"))] | sort_by(.createdAt) | reverse | .[$KEEP:] | .[].tagName" \
+          | while read -r old; do echo "Removing old mirror $old"; gh release delete "$old" --yes --cleanup-tag; done
+
       - name: Update ledger
         env:
           DOWNLOAD_REPO: zenoxart/DragonDAW-RS
+          MIRROR_REPO: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/update-ledger.mjs ledger/downloads-ledger.json
 

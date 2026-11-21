@@ -2,7 +2,7 @@ import { IMAGES, LINKS } from '../content'
 import { useScrollY, prefersReducedMotion } from '../hooks'
 import { Reveal, Button, Equalizer } from './ui'
 import { DownloadBadge } from './DownloadCount'
-import { primaryDownload } from './DownloadButtons'
+import { primaryDownload, startDownload } from './DownloadButtons'
 
 export default function Hero({ stats, visitor, onDownload }) {
   const primary = primaryDownload(stats, visitor)
@@ -28,9 +28,9 @@ export default function Hero({ stats, visitor, onDownload }) {
           mix and master in one fast, fierce studio, built in Rust.
         </Reveal>
         <Reveal className="hero-cta" delay={3}>
-          <Button href={primary.href} download={primary.download} target="_self" variant="btn-big" magnetic
-            onClick={() => primary.file && onDownload?.(primary.file)}>
-            {primary.label} <span className="arrow">{primary.download ? '↓' : '→'}</span>
+          <Button href={primary.href} target="_self" variant="btn-big" magnetic
+            onClick={primary.platformId ? (e) => startDownload(e, primary.platformId, stats, onDownload) : undefined}>
+            {primary.label} <span className="arrow">{primary.platformId ? '↓' : '→'}</span>
           </Button>
           <Button href={LINKS.github} variant="btn-ghost">★ Star on GitHub</Button>
         </Reveal>

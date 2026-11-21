@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useInView, prefersReducedMotion } from '../hooks'
-import { fetchReleases, summarizeReleases, detectPlatform, combineLedgers, ledgerTotal, LEDGER_URL } from '../lib/releases'
+import { fetchReleases, summarizeReleases, detectPlatform, combineLedgers, ledgerTotal, newestMirror, LEDGER_URL } from '../lib/releases'
 
 const fmt = new Intl.NumberFormat('en-US')
 
-const REFRESH_MS = 2 * 60 * 1000 // live API allows 60 requests/hour per visitor; this uses ≤ 30
+const REFRESH_MS = 2 * 60 * 1000 // refreshes read the ledger (no GitHub API limit); the API is used on load and on click
 const PENDING_KEY = 'dragondaw.pendingDownloads'
 const FLOOR_KEY = 'dragondaw.confirmedDownloads'
 const PENDING_TTL = 6 * 60 * 60 * 1000 // a click GitHub never counts (cancelled download) stops showing after 6 h
@@ -51,32 +51,45 @@ export function useDownloadStats() {
     const json = (url, opts) => fetch(url, opts).then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
     const baked = json('./stats.json', { cache: 'no-cache' }).catch(() => null)
 
-    const apply = (summary, ledger) => {
+    const apply = (summary, ledger, mirror) => {
       if (cancelled || !summary) return
       setData((cur) => {
-        const confirmed = Math.max(summary.downloads ?? 0, cur?.confirmed ?? 0, store.get(FLOOR_KEY, 0))
+        const merged = combineLedgers(cur?.ledger, ledger)
+        const confirmed = Math.max(summary.downloads ?? 0, ledgerTotal(merged), cur?.confirmed ?? 0, store.get(FLOOR_KEY, 0))
         store.set(FLOOR_KEY, confirmed)
-        return { ...(cur ?? {}), ...summary, confirmed, ledger: combineLedgers(cur?.ledger, ledger) }
+        return {
+          ...(cur ?? {}), ...summary, confirmed, ledger: merged,
+          // keep the newest platform links we've seen; a later ledger-only refresh doesn't drop them
+          platforms: { ...(cur?.platforms ?? {}), ...(summary.platforms ?? {}) },
+          mirror: newestMirror(cur?.mirror, mirror, summary.mirror),
+        }
       })
     }
 
-    baked.then((s) => s && apply(s, s.ledger))
+    baked.then((s) => s && apply(s, s.ledger, s.mirror))
 
-    const load = async () => {
-      const [b, l, r] = await Promise.allSettled([baked, json(`${LEDGER_URL}?t=${Date.now()}`), fetchReleases({ maxPages: 3 })])
+    // withApi: ask GitHub for live counts + links (on load). Periodic refreshes only read the
+    // ledger, so a page left open doesn't use up the visitor's GitHub API limit.
+    const load = async (withApi) => {
+      const [b, l, r] = await Promise.allSettled([
+        baked,
+        json(`${LEDGER_URL}?t=${Date.now()}`),
+        withApi ? fetchReleases({ maxPages: 3 }) : Promise.reject(new Error('skipped')),
+      ])
       const bakedStats = b.status === 'fulfilled' ? b.value : null
-      const ledger = combineLedgers(bakedStats?.ledger, l.status === 'fulfilled' ? l.value : null)
+      const raw = l.status === 'fulfilled' ? l.value : null
+      const ledger = combineLedgers(bakedStats?.ledger, raw)
       if (r.status === 'fulfilled' && r.value.length) {
         const live = summarizeReleases(r.value, ledger)
-        apply({ ...live, updatedAt: new Date().toISOString(), live: true }, live.ledger)
-      } else if (bakedStats || Object.keys(ledger.assets).length) {
-        apply({ ...(bakedStats ?? {}), downloads: Math.max(bakedStats?.downloads ?? 0, ledgerTotal(ledger)) }, ledger)
+        apply({ ...live, updatedAt: new Date().toISOString(), live: true }, live.ledger, raw?.mirror)
+      } else if (bakedStats || raw) {
+        apply({ downloads: Math.max(bakedStats?.downloads ?? 0, ledgerTotal(ledger)) }, ledger, raw?.mirror)
       }
     }
 
-    load()
-    const timer = setInterval(() => { if (document.visibilityState === 'visible') load() }, REFRESH_MS)
-    const onVisible = () => { if (document.visibilityState === 'visible') load() }
+    load(true)
+    const timer = setInterval(() => { if (document.visibilityState === 'visible') load(false) }, REFRESH_MS)
+    const onVisible = () => { if (document.visibilityState === 'visible') load(false) }
     document.addEventListener('visibilitychange', onVisible)
     return () => { cancelled = true; clearInterval(timer); document.removeEventListener('visibilitychange', onVisible) }
   }, [])

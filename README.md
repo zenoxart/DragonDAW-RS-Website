@@ -42,6 +42,14 @@ Where the links come from:
 Shared logic: `src/lib/releases.js` (archive names must match `dragon-daw-<version>-<platform>.zip|.tar.gz`
 from the DragonDAW-RS release workflow). Run locally with `npm run stats`.
 
+**Downloads never 404:** the DragonDAW-RS release workflow deletes the nightly before uploading
+the new one, so for about a minute per build there is no nightly, and links to older builds break.
+The buttons therefore decide *at click time* which file exists (`resolveDownload` in
+`src/lib/releases.js`): the newest finished upload on GitHub, otherwise the **download mirror**.
+`download-stats.yml` copies every complete nightly to a `mirror-<version>` release in this repo
+(keeps the last 3; old ones are removed only after the new one is fully uploaded). A button's plain
+link (copy link / open in new tab) points to the mirror copy. Mirror downloads count too.
+
 **All-time count:** GitHub forgets a file's download count when the file is deleted, and the
 nightly is replaced on every DragonDAW-RS build. `.github/workflows/download-stats.yml` runs every
 5 minutes and stores the highest count ever seen for each release file in `downloads-ledger.json`

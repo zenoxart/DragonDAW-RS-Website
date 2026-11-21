@@ -24,7 +24,7 @@ async function main() {
     const ledger = ledgerFile ? JSON.parse(await readFile(ledgerFile, 'utf8').catch(() => 'null')) : null
     if (ledgerFile && !ledger) console.warn(`::warning::No ledger at ${ledgerFile}; counting current files only.`)
     const summary = summarizeReleases(releases, ledger)
-    const stats = { ...summary, updatedAt: new Date().toISOString() }
+    const stats = { ...summary, mirror: ledger?.mirror ?? null, updatedAt: new Date().toISOString() }
     await mkdir(new URL('../public/', import.meta.url), { recursive: true })
     await writeFile(OUT, JSON.stringify(stats, null, 2) + '\n')
     const links = Object.entries(summary.platforms).map(([id, p]) => `${id}=${p.name}`).join(', ')

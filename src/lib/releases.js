@@ -10,6 +10,13 @@ export const RELEASES_PAGE = `https://github.com/${DOWNLOAD_REPO}/releases`
 // highest count ever seen for every release file, including deleted ones.
 export const LEDGER_URL = 'https://raw.githubusercontent.com/zenoxart/DragonDAW-RS-Website/stats/downloads-ledger.json'
 
+// Download mirror: the release workflow of DragonDAW-RS deletes the nightly before uploading the
+// new one, so for about a minute per build (and forever, for links to older builds) a nightly file
+// can be missing. download-stats.yml copies every complete nightly to a `mirror-<version>` release
+// in the website repo and keeps the last few, so there is always a file to download.
+export const MIRROR_REPO = 'zenoxart/DragonDAW-RS-Website'
+export const MIRROR_PREFIX = 'mirror-'
+
 // Matches the archive names produced by DragonDAW-RS/.github/workflows/release.yml:
 // dragon-daw-<version>-<platform>.zip | .tar.gz
 export const PLATFORMS = [
@@ -29,6 +36,47 @@ function versionLabel(name, suffix) {
 }
 
 const time = (r) => Date.parse(r.published_at || r.created_at || 0)
+
+// An asset is downloadable once its upload has finished (state "uploaded"; mocks may omit it).
+const ready = (a) => !a.state || a.state === 'uploaded'
+
+function fileInfo(asset, p, r) {
+  return {
+    id: String(asset.id),
+    url: asset.browser_download_url,
+    version: versionLabel(asset.name, p.suffix),
+    name: asset.name,
+    size: asset.size,
+    release: r.tag_name,
+    releaseName: r.name || r.tag_name,
+    prerelease: !!r.prerelease,
+    publishedAt: r.published_at,
+  }
+}
+
+/**
+ * Newest complete mirror release (all platforms uploaded) from the website repo's releases.
+ * @returns {{tag, publishedAt, platforms}|null}
+ */
+export function mirrorFromReleases(releases) {
+  const mirrors = releases
+    .filter((r) => !r.draft && r.tag_name?.startsWith(MIRROR_PREFIX))
+    .sort((a, b) => time(b) - time(a))
+  for (const r of mirrors) {
+    const platforms = {}
+    for (const p of PLATFORMS) {
+      const asset = (r.assets ?? []).find((a) => a.name.endsWith(p.suffix) && ready(a))
+      if (asset) platforms[p.id] = { ...fileInfo(asset, p, r), mirror: true }
+    }
+    if (Object.keys(platforms).length === PLATFORMS.length) return { tag: r.tag_name, publishedAt: r.published_at, platforms }
+  }
+  return null
+}
+
+/** The newer of several mirror descriptions (from stats.json, the ledger, …). */
+export function newestMirror(...mirrors) {
+  return mirrors.filter(Boolean).sort((a, b) => Date.parse(b.publishedAt || 0) - Date.parse(a.publishedAt || 0))[0] ?? null
+}
 
 /**
  * Merges the current release files into a ledger. Never lowers a count, never forgets a file.
@@ -78,7 +126,9 @@ export function combineLedgers(...ledgers) {
  *          downloads = all-time total (deleted nightlies included)
  */
 export function summarizeReleases(releases, ledger) {
-  const usable = releases.filter((r) => !r.draft).sort((a, b) => time(b) - time(a))
+  const usable = releases
+    .filter((r) => !r.draft && !r.tag_name?.startsWith(MIRROR_PREFIX))
+    .sort((a, b) => time(b) - time(a))
 
   const merged = mergeLedger(ledger, usable)
   const downloads = ledgerTotal(merged)
@@ -87,19 +137,9 @@ export function summarizeReleases(releases, ledger) {
   const platforms = {}
   for (const p of PLATFORMS) {
     for (const r of usable) {
-      const asset = (r.assets ?? []).find((a) => a.name.endsWith(p.suffix))
+      const asset = (r.assets ?? []).find((a) => a.name.endsWith(p.suffix) && ready(a))
       if (asset) {
-        platforms[p.id] = {
-          id: String(asset.id),
-          url: asset.browser_download_url,
-          version: versionLabel(asset.name, p.suffix),
-          name: asset.name,
-          size: asset.size,
-          release: r.tag_name,
-          releaseName: r.name || r.tag_name,
-          prerelease: !!r.prerelease,
-          publishedAt: r.published_at,
-        }
+        platforms[p.id] = fileInfo(asset, p, r)
         break
       }
     }
@@ -115,18 +155,39 @@ export function summarizeReleases(releases, ledger) {
 }
 
 /** Fetches all releases (paginated). Works in the browser and in Node 18+. */
-export async function fetchReleases({ repo = DOWNLOAD_REPO, token, maxPages = 20 } = {}) {
+export async function fetchReleases({ repo = DOWNLOAD_REPO, token, maxPages = 20, fresh = false } = {}) {
   const headers = { Accept: 'application/vnd.github+json' }
   if (token) headers.Authorization = `Bearer ${token}`
   const all = []
   for (let page = 1; page <= maxPages; page++) {
-    const res = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=100&page=${page}`, { headers })
+    const res = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=100&page=${page}`,
+      fresh ? { headers, cache: 'no-store' } : { headers })
     if (!res.ok) throw new Error(`GitHub API ${res.status} ${res.statusText}`)
     const batch = await res.json()
     all.push(...batch)
     if (batch.length < 100) break
   }
   return all
+}
+
+/**
+ * Finds a file that exists right now for a platform, at the moment of the click:
+ *   1. ask GitHub for the newest finished upload (stable or nightly)
+ *   2. otherwise (nightly being rebuilt, GitHub unreachable or rate-limited) the newest
+ *      complete mirror from the ledger, then any mirror the page already knows
+ * Returns null only if nothing at all is reachable; the caller then opens the releases page.
+ */
+export async function resolveDownload(platformId, knownMirrors = []) {
+  try {
+    const file = summarizeReleases(await fetchReleases({ maxPages: 1, fresh: true })).platforms[platformId]
+    if (file) return file
+  } catch { /* fall back to the mirror */ }
+  let ledgerMirror = null
+  try {
+    const ledger = await fetch(`${LEDGER_URL}?t=${Date.now()}`, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null))
+    ledgerMirror = ledger?.mirror
+  } catch { /* use what the page knows */ }
+  return newestMirror(ledgerMirror, ...knownMirrors)?.platforms?.[platformId] ?? null
 }
 
 /** Best guess of the visitor's platform id (null if unknown, e.g. phones). */
