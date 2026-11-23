@@ -1,0 +1,24 @@
+name: Vendor images (one-time)
+
+# One-time job: copies the two Higgsfield images into the repo so the site no longer loads
+# them from a third-party CDN. Removed again right after it has run.
+on: workflow_dispatch
+permissions: {}
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download images
+        run: |
+          set -euo pipefail
+          base=https://d8j0ntlcm91z4.cloudfront.net/user_3Hs2wRAhT9DncV0lApoXxWtztzX
+          curl -fsSL -o public/assets/hero.png   "$base/hf_20261118_100533_ece4138f-c2b7-4b9f-83ab-d2d6deef09c0.png"
+          curl -fsSL -o public/assets/studio.png "$base/hf_20261118_100538_68be9ac4-a535-49e8-9d66-751dd37f703a.png"
+          file public/assets/hero.png public/assets/studio.png
+          git add public/assets/hero.png public/assets/studio.png
+          git -c user.name="github-actions[bot]" -c user.email="41898333+github-actions[bot]@users.noreply.github.com" \
+            commit -m "Add hero and studio images (self-hosted instead of Higgsfield CDN)"
+          git push
