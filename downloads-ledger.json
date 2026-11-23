@@ -1,56 +1,56 @@
 {
   "repo": "zenoxart/DragonDAW-RS",
-  "total": 806,
+  "total": 810,
   "mirror": {
-    "tag": "mirror-nightly-5ff46c1",
-    "publishedAt": "2026-11-21T16:29:20Z",
+    "tag": "mirror-nightly-06d7ecd",
+    "publishedAt": "2026-11-23T08:53:47Z",
     "platforms": {
       "windows": {
-        "id": "776160329",
-        "url": "https://github.com/zenoxart/DragonDAW-RS-Website/releases/download/mirror-nightly-5ff46c1/dragon-daw-nightly-5ff46c1-windows-x86_64.zip",
-        "version": "Nightly · 5ff46c1",
-        "name": "dragon-daw-nightly-5ff46c1-windows-x86_64.zip",
-        "size": 137903262,
-        "release": "mirror-nightly-5ff46c1",
-        "releaseName": "Download mirror: DragonDaw nightly-5ff46c1",
+        "id": "782222310",
+        "url": "https://github.com/zenoxart/DragonDAW-RS-Website/releases/download/mirror-nightly-06d7ecd/dragon-daw-nightly-06d7ecd-windows-x86_64.zip",
+        "version": "Nightly · 06d7ecd",
+        "name": "dragon-daw-nightly-06d7ecd-windows-x86_64.zip",
+        "size": 138506377,
+        "release": "mirror-nightly-06d7ecd",
+        "releaseName": "Download mirror: DragonDaw nightly-06d7ecd",
         "prerelease": true,
-        "publishedAt": "2026-11-21T16:29:20Z",
+        "publishedAt": "2026-11-23T08:53:47Z",
         "mirror": true
       },
       "linux": {
-        "id": "776160334",
-        "url": "https://github.com/zenoxart/DragonDAW-RS-Website/releases/download/mirror-nightly-5ff46c1/dragon-daw-nightly-5ff46c1-linux-x86_64.tar.gz",
-        "version": "Nightly · 5ff46c1",
-        "name": "dragon-daw-nightly-5ff46c1-linux-x86_64.tar.gz",
-        "size": 150598440,
-        "release": "mirror-nightly-5ff46c1",
-        "releaseName": "Download mirror: DragonDaw nightly-5ff46c1",
+        "id": "782222305",
+        "url": "https://github.com/zenoxart/DragonDAW-RS-Website/releases/download/mirror-nightly-06d7ecd/dragon-daw-nightly-06d7ecd-linux-x86_64.tar.gz",
+        "version": "Nightly · 06d7ecd",
+        "name": "dragon-daw-nightly-06d7ecd-linux-x86_64.tar.gz",
+        "size": 151272759,
+        "release": "mirror-nightly-06d7ecd",
+        "releaseName": "Download mirror: DragonDaw nightly-06d7ecd",
         "prerelease": true,
-        "publishedAt": "2026-11-21T16:29:20Z",
+        "publishedAt": "2026-11-23T08:53:47Z",
         "mirror": true
       },
       "macos-arm64": {
-        "id": "776160338",
-        "url": "https://github.com/zenoxart/DragonDAW-RS-Website/releases/download/mirror-nightly-5ff46c1/dragon-daw-nightly-5ff46c1-macos-arm64.tar.gz",
-        "version": "Nightly · 5ff46c1",
-        "name": "dragon-daw-nightly-5ff46c1-macos-arm64.tar.gz",
-        "size": 23852231,
-        "release": "mirror-nightly-5ff46c1",
-        "releaseName": "Download mirror: DragonDaw nightly-5ff46c1",
+        "id": "782222308",
+        "url": "https://github.com/zenoxart/DragonDAW-RS-Website/releases/download/mirror-nightly-06d7ecd/dragon-daw-nightly-06d7ecd-macos-arm64.tar.gz",
+        "version": "Nightly · 06d7ecd",
+        "name": "dragon-daw-nightly-06d7ecd-macos-arm64.tar.gz",
+        "size": 24499259,
+        "release": "mirror-nightly-06d7ecd",
+        "releaseName": "Download mirror: DragonDaw nightly-06d7ecd",
         "prerelease": true,
-        "publishedAt": "2026-11-21T16:29:20Z",
+        "publishedAt": "2026-11-23T08:53:47Z",
         "mirror": true
       },
       "macos-x64": {
-        "id": "776160328",
-        "url": "https://github.com/zenoxart/DragonDAW-RS-Website/releases/download/mirror-nightly-5ff46c1/dragon-daw-nightly-5ff46c1-macos-x86_64.tar.gz",
-        "version": "Nightly · 5ff46c1",
-        "name": "dragon-daw-nightly-5ff46c1-macos-x86_64.tar.gz",
-        "size": 24633889,
-        "release": "mirror-nightly-5ff46c1",
-        "releaseName": "Download mirror: DragonDaw nightly-5ff46c1",
+        "id": "782222306",
+        "url": "https://github.com/zenoxart/DragonDAW-RS-Website/releases/download/mirror-nightly-06d7ecd/dragon-daw-nightly-06d7ecd-macos-x86_64.tar.gz",
+        "version": "Nightly · 06d7ecd",
+        "name": "dragon-daw-nightly-06d7ecd-macos-x86_64.tar.gz",
+        "size": 25388574,
+        "release": "mirror-nightly-06d7ecd",
+        "releaseName": "Download mirror: DragonDaw nightly-06d7ecd",
         "prerelease": true,
-        "publishedAt": "2026-11-21T16:29:20Z",
+        "publishedAt": "2026-11-23T08:53:47Z",
         "mirror": true
       }
     }
@@ -397,28 +397,28 @@
       "release": "mirror-nightly-986e5d2",
       "count": 1,
       "firstSeen": "2026-11-21T16:06:19.409Z",
-      "lastSeen": "2026-11-23T08:35:00.013Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "776097146": {
       "name": "dragon-daw-nightly-986e5d2-linux-x86_64.tar.gz",
       "release": "mirror-nightly-986e5d2",
       "count": 1,
       "firstSeen": "2026-11-21T16:06:19.409Z",
-      "lastSeen": "2026-11-23T08:35:00.013Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "776097147": {
       "name": "dragon-daw-nightly-986e5d2-macos-arm64.tar.gz",
       "release": "mirror-nightly-986e5d2",
       "count": 1,
       "firstSeen": "2026-11-21T16:06:19.409Z",
-      "lastSeen": "2026-11-23T08:35:00.013Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "776097152": {
       "name": "dragon-daw-nightly-986e5d2-macos-x86_64.tar.gz",
       "release": "mirror-nightly-986e5d2",
       "count": 1,
       "firstSeen": "2026-11-21T16:06:19.409Z",
-      "lastSeen": "2026-11-23T08:35:00.013Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "776116582": {
       "name": "dragon-daw-nightly-ca6f19a-macos-arm64.tar.gz",
@@ -453,28 +453,28 @@
       "release": "mirror-nightly-ca6f19a",
       "count": 1,
       "firstSeen": "2026-11-21T16:16:33.654Z",
-      "lastSeen": "2026-11-23T08:35:00.013Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "776124435": {
       "name": "dragon-daw-nightly-ca6f19a-macos-arm64.tar.gz",
       "release": "mirror-nightly-ca6f19a",
       "count": 1,
       "firstSeen": "2026-11-21T16:16:33.654Z",
-      "lastSeen": "2026-11-23T08:35:00.013Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "776124436": {
       "name": "dragon-daw-nightly-ca6f19a-windows-x86_64.zip",
       "release": "mirror-nightly-ca6f19a",
       "count": 1,
       "firstSeen": "2026-11-21T16:16:33.654Z",
-      "lastSeen": "2026-11-23T08:35:00.013Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "776124437": {
       "name": "dragon-daw-nightly-ca6f19a-linux-x86_64.tar.gz",
       "release": "mirror-nightly-ca6f19a",
       "count": 1,
       "firstSeen": "2026-11-21T16:16:33.654Z",
-      "lastSeen": "2026-11-23T08:35:00.013Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "776157889": {
       "name": "dragon-daw-nightly-5ff46c1-windows-x86_64.zip",
@@ -675,30 +675,58 @@
     "778510424": {
       "name": "dragon-daw-nightly-06d7ecd-linux-x86_64.tar.gz",
       "release": "nightly",
-      "count": 117,
+      "count": 118,
       "firstSeen": "2026-11-22T09:23:55.882Z",
-      "lastSeen": "2026-11-23T08:35:00.012Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "778510428": {
       "name": "dragon-daw-nightly-06d7ecd-macos-arm64.tar.gz",
       "release": "nightly",
-      "count": 117,
+      "count": 118,
       "firstSeen": "2026-11-22T09:23:55.882Z",
-      "lastSeen": "2026-11-23T08:35:00.012Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "778510429": {
       "name": "dragon-daw-nightly-06d7ecd-macos-x86_64.tar.gz",
       "release": "nightly",
-      "count": 117,
+      "count": 118,
       "firstSeen": "2026-11-22T09:23:55.882Z",
-      "lastSeen": "2026-11-23T08:35:00.012Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     },
     "778510430": {
       "name": "dragon-daw-nightly-06d7ecd-windows-x86_64.zip",
       "release": "nightly",
-      "count": 120,
+      "count": 121,
       "firstSeen": "2026-11-22T09:23:55.882Z",
-      "lastSeen": "2026-11-23T08:35:00.012Z"
+      "lastSeen": "2026-11-23T08:53:50.989Z"
+    },
+    "782222305": {
+      "name": "dragon-daw-nightly-06d7ecd-linux-x86_64.tar.gz",
+      "release": "mirror-nightly-06d7ecd",
+      "count": 0,
+      "firstSeen": "2026-11-23T08:53:50.989Z",
+      "lastSeen": "2026-11-23T08:53:50.989Z"
+    },
+    "782222306": {
+      "name": "dragon-daw-nightly-06d7ecd-macos-x86_64.tar.gz",
+      "release": "mirror-nightly-06d7ecd",
+      "count": 0,
+      "firstSeen": "2026-11-23T08:53:50.989Z",
+      "lastSeen": "2026-11-23T08:53:50.989Z"
+    },
+    "782222308": {
+      "name": "dragon-daw-nightly-06d7ecd-macos-arm64.tar.gz",
+      "release": "mirror-nightly-06d7ecd",
+      "count": 0,
+      "firstSeen": "2026-11-23T08:53:50.989Z",
+      "lastSeen": "2026-11-23T08:53:50.989Z"
+    },
+    "782222310": {
+      "name": "dragon-daw-nightly-06d7ecd-windows-x86_64.zip",
+      "release": "mirror-nightly-06d7ecd",
+      "count": 0,
+      "firstSeen": "2026-11-23T08:53:50.989Z",
+      "lastSeen": "2026-11-23T08:53:50.989Z"
     }
   }
 }
