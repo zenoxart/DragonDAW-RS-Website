@@ -3,6 +3,7 @@ import { Reveal, Button, Equalizer, CountUp } from './ui'
 import { Brand } from './Nav'
 import { AnimatedNumber } from './DownloadCount'
 import DownloadButtons from './DownloadButtons'
+import { checksumUrl } from '../lib/releases'
 
 export function Marquee() {
   const text = 'RECORD ✦ BEATS ✦ MIX ✦ MASTER ✦ OPEN SOURCE ✦ FREE FOREVER ✦ BUILT IN RUST ✦ '
@@ -143,7 +144,14 @@ export function Cta({ stats, visitor, onDownload }) {
           <p className="cta-count">Already downloaded <strong><AnimatedNumber value={stats.downloads} /></strong> times</p>
         )}
         <DownloadButtons stats={stats} visitor={visitor} onDownload={onDownload} />
-        <a className="all-releases" href={LINKS.releases} target="_blank" rel="noopener">All releases &amp; checksums →</a>
+        {checksumUrl(stats?.platforms?.[visitor ?? 'windows']) && (
+          <p className="verify-note">
+            Verify your download: its SHA-256 must match the{' '}
+            <a href={checksumUrl(stats.platforms[visitor ?? 'windows'])} target="_blank" rel="noopener noreferrer">checksum list</a>
+            {' '}(<code>certutil -hashfile file SHA256</code> on Windows, <code>shasum -a 256 file</code> on macOS/Linux).
+          </p>
+        )}
+        <a className="all-releases" href={LINKS.releases} target="_blank" rel="noopener noreferrer">All releases &amp; checksums →</a>
       </Reveal>
     </section>
   )

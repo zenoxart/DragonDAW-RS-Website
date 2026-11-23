@@ -25,6 +25,19 @@ npm run preview  # preview the production build
 After the first deploy, add the site to [Google Search Console](https://search.google.com/search-console)
 (domain property `dragondaw.com`, verify via DNS TXT record) and submit `https://dragondaw.com/sitemap.xml`.
 
+## Security
+
+- **Download links are validated** (`isTrustedDownloadUrl` in `src/lib/releases.js`): only
+  `https://github.com/zenoxart/DragonDAW-RS(-Website)/releases/download/…/dragon-daw-….zip|.tar.gz`
+  is ever used as a link or navigation target, whatever the API, ledger or stats.json say.
+- **Content Security Policy** is added to the built pages by `scripts/prerender.mjs` (GitHub Pages
+  can't send headers): own scripts/styles/fonts/images/video only; network only to this site,
+  `api.github.com` and `raw.githubusercontent.com`. `npm run dev` runs without it.
+- **No third-party assets:** images and fonts are served from this site.
+- **Workflows:** no default permissions, per-job least privilege, actions pinned to commit SHAs
+  (Dependabot keeps them updated), `npm ci --ignore-scripts`, no stored git credentials in the build.
+- Report security problems privately via the repo's *Security → Report a vulnerability*.
+
 ## Downloads & download counter
 
 The download section has four direct buttons: **Windows x64 (.zip), Linux x64 (.tar.gz),

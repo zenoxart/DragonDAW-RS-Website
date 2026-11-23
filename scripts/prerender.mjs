@@ -14,6 +14,27 @@ import { resolve } from 'node:path'
 const root = resolve(import.meta.dirname, '..')
 const { render } = await import(pathToFileURL(resolve(root, 'dist-ssr/entry-server.js')).href)
 
+// Security: Content Security Policy for the built pages (GitHub Pages can't send HTTP headers,
+// so it goes in a <meta> tag). Only this site's own scripts, styles, fonts, images and video;
+// network requests only to this site and the two GitHub hosts the download logic uses.
+// Added at build time only, because the dev server (npm run dev) needs inline scripts.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'", // React style={{…}} attributes (e.g. --d delays, backgrounds)
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "media-src 'self'",
+  "connect-src 'self' https://api.github.com https://raw.githubusercontent.com",
+  "object-src 'none'",
+  "frame-src 'none'",
+  "worker-src 'none'",
+  "base-uri 'self'",
+  "form-action 'none'",
+  'upgrade-insecure-requests',
+].join('; ')
+const SECURITY_META = `<meta http-equiv="Content-Security-Policy" content="${CSP}">\n`
+
 const pages = [
   { name: 'home', file: 'dist/index.html', assetPrefix: './' },
   { name: 'impressum', file: 'dist/impressum/index.html', assetPrefix: '../' },
@@ -28,7 +49,11 @@ for (const page of pages) {
   if (page.assetPrefix !== './') body = body.replaceAll('"./assets/', `"${page.assetPrefix}assets/`)
 
   if (!html.includes('<div id="root"></div>')) throw new Error(`${page.file}: <div id="root"></div> not found`)
-  await writeFile(path, html.replace('<div id="root"></div>', `<div id="root">${body}</div>`))
+  if (!html.includes('<meta charset="UTF-8">')) throw new Error(`${page.file}: charset meta not found`)
+  const out = html
+    .replace('<meta charset="UTF-8">', `<meta charset="UTF-8">\n${SECURITY_META}`)
+    .replace('<div id="root"></div>', `<div id="root">${body}</div>`)
+  await writeFile(path, out)
   console.log(`prerendered ${page.file} (${(body.length / 1024).toFixed(1)} KB of HTML)`)
 }
 

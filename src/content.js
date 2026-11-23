@@ -1,11 +1,10 @@
 // Central place for links, images and copy.
-// Images were generated with Higgsfield. To host them yourself, save them into
-// public/assets/ and change these to '/assets/hero.png' etc.
+// Images were generated with Higgsfield and are served from this site (public/assets).
 export const IMAGES = {
-  hero: 'https://d8j0ntlcm91z4.cloudfront.net/user_3Hs2wRAhT9DncV0lApoXxWtztzX/hf_20261118_100533_ece4138f-c2b7-4b9f-83ab-d2d6deef09c0.png',
+  hero: './assets/hero.webp',
   logo: './assets/dragon-logo.png',  // official DragonDaw logo
   mark: './assets/dragon-mark.png',  // small dragon head for nav, footer, favicon
-  studio: 'https://d8j0ntlcm91z4.cloudfront.net/user_3Hs2wRAhT9DncV0lApoXxWtztzX/hf_20261118_100538_68be9ac4-a535-49e8-9d66-751dd37f703a.png',
+  studio: './assets/studio.webp',
 }
 
 export const LINKS = {

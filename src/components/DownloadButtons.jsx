@@ -1,4 +1,4 @@
-import { PLATFORMS, RELEASES_PAGE, formatSize, resolveDownload } from '../lib/releases'
+import { PLATFORMS, RELEASES_PAGE, formatSize, resolveDownload, trustedFile, isTrustedDownloadUrl, checksumUrl } from '../lib/releases'
 
 /**
  * Click handler for every download button. Decides at click time which file exists *now*
@@ -13,7 +13,7 @@ export async function startDownload(event, platformId, stats, onDownload) {
   el.dataset.busy = '1'
   el.classList.add('resolving')
   try {
-    const file = await resolveDownload(platformId, [stats?.mirror])
+    const file = trustedFile(await resolveDownload(platformId, [stats?.mirror]))
     if (file) {
       onDownload?.(file)
       window.location.assign(file.url)
@@ -28,7 +28,7 @@ export async function startDownload(event, platformId, stats, onDownload) {
 
 /** Link for right-click "copy link" / new-tab: the mirror copy outlives the current nightly. */
 export function stableHref(platformId, stats) {
-  return stats?.mirror?.platforms?.[platformId]?.url ?? stats?.platforms?.[platformId]?.url ?? RELEASES_PAGE
+  return [stats?.mirror?.platforms?.[platformId]?.url, stats?.platforms?.[platformId]?.url].find(isTrustedDownloadUrl) ?? RELEASES_PAGE
 }
 
 const ICONS = {

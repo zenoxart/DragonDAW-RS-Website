@@ -34,7 +34,7 @@ export function Button({ href, variant = '', magnetic = false, children, ...rest
       className={`btn ${variant}`}
       onPointerMove={onMove}
       onPointerLeave={onLeave}
-      {...(external ? { target: '_blank', rel: 'noopener' } : {})}
+      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       {...rest}
     >
       {children}

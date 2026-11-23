@@ -11,8 +11,9 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
-permissions:
-  contents: write
+# Security: no permissions by default; the job below may only write repository contents
+# (the stats branch and the mirror releases). Actions are pinned to commit SHAs.
+permissions: {}
 
 concurrency:
   group: download-stats
@@ -21,10 +22,12 @@ concurrency:
 jobs:
   ledger:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
 
@@ -57,6 +60,8 @@ jobs:
                        | select(test("-(windows-x86_64\\.zip|linux-x86_64\\.tar\\.gz|macos-arm64\\.tar\\.gz|macos-x86_64\\.tar\\.gz)$"))] | length' <<<"$nightly")
           if [ "$ready" -lt 4 ]; then echo "Nightly not complete yet ($ready/4 files). Mirror unchanged."; exit 0; fi
           version=$(jq -r '.assets[].name | select(endswith("-windows-x86_64.zip")) | sub("^dragon-daw-"; "") | sub("-windows-x86_64\\.zip$"; "")' <<<"$nightly")
+          # the version ends up in a tag name and a shell command: allow only safe characters
+          if ! [[ "$version" =~ ^[A-Za-z0-9._-]+$ ]]; then echo "::error::Unexpected version '$version'"; exit 1; fi
           tag="mirror-$version"
           if gh release view "$tag" >/dev/null 2>&1; then echo "Mirror $tag is up to date."; exit 0; fi
 

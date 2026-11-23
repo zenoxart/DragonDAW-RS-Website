@@ -14,10 +14,9 @@ on:
     - cron: '17 */6 * * *'
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+# Security: no permissions by default; each job gets only what it needs (see below).
+# Actions are pinned to commit SHAs (a tag can be moved by its owner); Dependabot updates them.
+permissions: {}
 
 concurrency:
   group: website-${{ github.ref }}
@@ -29,16 +28,21 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false # don't leave a token in .git/config for npm packages to find
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: npm
 
       - name: Install
-        run: npm ci
+        # --ignore-scripts: dependencies can't run install scripts on the runner
+        run: npm ci --ignore-scripts
 
       # Fails only on vulnerabilities in what ships to visitors (React).
       # Build-tool advisories (dev dependencies) are reported but don't block.
@@ -60,9 +64,7 @@ jobs:
       - name: Update download counter
         env:
           DOWNLOAD_REPO: zenoxart/DragonDAW-RS
-          # Needed if DragonDAW-RS is private: a fine-grained token with read access
-          # to its contents, saved as the repository secret DOWNLOADS_TOKEN.
-          GITHUB_TOKEN: ${{ secrets.DOWNLOADS_TOKEN || github.token }}
+          GITHUB_TOKEN: ${{ github.token }} # read-only here; DragonDAW-RS is public
         run: node scripts/fetch-downloads.mjs
 
       - name: Build
@@ -72,10 +74,7 @@ jobs:
       - name: Version stamp
         run: echo "${{ github.sha }}" > dist/version.txt
 
-      - uses: actions/configure-pages@v6
-        if: github.event_name != 'pull_request'
-
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name != 'pull_request'
         with:
           path: dist
@@ -84,28 +83,16 @@ jobs:
     needs: build
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # only the deploy job may publish to GitHub Pages
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: https://${{ env.SITE_DOMAIN }}
-    env:
-      HAS_PAGES_TOKEN: ${{ secrets.PAGES_ADMIN_TOKEN != '' }}
     steps:
-      # Optional: keeps the custom domain + HTTPS set on the Pages site.
-      # Needs a fine-grained token with "Pages: read and write" on this repo,
-      # saved as the secret PAGES_ADMIN_TOKEN. Without it, set the domain once
-      # in Settings → Pages → Custom domain.
-      - name: Ensure custom domain
-        env:
-          GH_TOKEN: ${{ secrets.PAGES_ADMIN_TOKEN }}
-        if: env.HAS_PAGES_TOKEN == 'true'
-        run: |
-          gh api -X PUT "repos/${{ github.repository }}/pages" \
-            -f cname="$SITE_DOMAIN" -F https_enforced=true \
-          || gh api -X PUT "repos/${{ github.repository }}/pages" -f cname="$SITE_DOMAIN" \
-          || echo "::warning::Could not set the custom domain via API (HTTPS may still be provisioning)"
-
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
       # Waits for https://dragondaw.com to serve this commit (up to ~5 minutes).
       - name: Check dragondaw.com is live

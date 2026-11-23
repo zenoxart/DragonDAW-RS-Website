@@ -73,8 +73,8 @@ export default function Impressum() {
           </ul>
           <p>
             Weitere Informationen finden sich in den Datenschutzerklärungen der Anbieter:{' '}
-            <a className="mail-link" href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub</a>,{' '}
-            <a className="mail-link" href="https://aws.amazon.com/privacy/" target="_blank" rel="noopener">Amazon Web Services</a>.
+            <a className="mail-link" href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub</a>,{' '}
+            <a className="mail-link" href="https://aws.amazon.com/privacy/" target="_blank" rel="noopener noreferrer">Amazon Web Services</a>.
           </p>
         </section>
       </main>

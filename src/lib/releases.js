@@ -17,6 +17,17 @@ export const LEDGER_URL = 'https://raw.githubusercontent.com/zenoxart/DragonDAW-
 export const MIRROR_REPO = 'zenoxart/DragonDAW-RS-Website'
 export const MIRROR_PREFIX = 'mirror-'
 
+// Security: download links come from outside data (GitHub API, the ledger on the stats branch,
+// stats.json). Only links to DragonDaw release archives in these two repos are ever used, so a
+// tampered ledger or release can't send visitors to another site or run a javascript: URL.
+const TRUSTED_DOWNLOAD = /^https:\/\/github\.com\/zenoxart\/DragonDAW-RS(-Website)?\/releases\/download\/[A-Za-z0-9._-]+\/dragon-daw-[A-Za-z0-9._-]+\.(zip|tar\.gz)$/i
+export const isTrustedDownloadUrl = (url) => typeof url === 'string' && TRUSTED_DOWNLOAD.test(url)
+/** The file if its link is trusted, otherwise null. */
+export const trustedFile = (file) => (file && isTrustedDownloadUrl(file.url) ? file : null)
+
+/** Checksum file next to a trusted download (every release has SHA256SUMS.txt). */
+export const checksumUrl = (file) => (trustedFile(file) ? file.url.replace(/[^/]+$/, 'SHA256SUMS.txt') : null)
+
 // Matches the archive names produced by DragonDAW-RS/.github/workflows/release.yml:
 // dragon-daw-<version>-<platform>.zip | .tar.gz
 export const PLATFORMS = [
@@ -65,7 +76,7 @@ export function mirrorFromReleases(releases) {
   for (const r of mirrors) {
     const platforms = {}
     for (const p of PLATFORMS) {
-      const asset = (r.assets ?? []).find((a) => a.name.endsWith(p.suffix) && ready(a))
+      const asset = (r.assets ?? []).find((a) => a.name.endsWith(p.suffix) && ready(a) && isTrustedDownloadUrl(a.browser_download_url))
       if (asset) platforms[p.id] = { ...fileInfo(asset, p, r), mirror: true }
     }
     if (Object.keys(platforms).length === PLATFORMS.length) return { tag: r.tag_name, publishedAt: r.published_at, platforms }
@@ -137,7 +148,7 @@ export function summarizeReleases(releases, ledger) {
   const platforms = {}
   for (const p of PLATFORMS) {
     for (const r of usable) {
-      const asset = (r.assets ?? []).find((a) => a.name.endsWith(p.suffix) && ready(a))
+      const asset = (r.assets ?? []).find((a) => a.name.endsWith(p.suffix) && ready(a) && isTrustedDownloadUrl(a.browser_download_url))
       if (asset) {
         platforms[p.id] = fileInfo(asset, p, r)
         break
@@ -179,7 +190,7 @@ export async function fetchReleases({ repo = DOWNLOAD_REPO, token, maxPages = 20
  */
 export async function resolveDownload(platformId, knownMirrors = []) {
   try {
-    const file = summarizeReleases(await fetchReleases({ maxPages: 1, fresh: true })).platforms[platformId]
+    const file = trustedFile(summarizeReleases(await fetchReleases({ maxPages: 1, fresh: true })).platforms[platformId])
     if (file) return file
   } catch { /* fall back to the mirror */ }
   let ledgerMirror = null
@@ -187,7 +198,11 @@ export async function resolveDownload(platformId, knownMirrors = []) {
     const ledger = await fetch(`${LEDGER_URL}?t=${Date.now()}`, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null))
     ledgerMirror = ledger?.mirror
   } catch { /* use what the page knows */ }
-  return newestMirror(ledgerMirror, ...knownMirrors)?.platforms?.[platformId] ?? null
+  for (const mirror of [ledgerMirror, ...knownMirrors].filter(Boolean).sort((a, b) => Date.parse(b.publishedAt || 0) - Date.parse(a.publishedAt || 0))) {
+    const file = trustedFile(mirror.platforms?.[platformId])
+    if (file) return file
+  }
+  return null
 }
 
 /** Best guess of the visitor's platform id (null if unknown, e.g. phones). */
