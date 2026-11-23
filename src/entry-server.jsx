@@ -4,6 +4,8 @@ import { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 import App from './App'
 import Impressum from './components/Impressum'
+export { FAQ, LINKS } from './content'
+export { default as adVideoUrl } from './assets/advideo.mp4'
 
 export function render(page) {
   const Page = page === 'impressum' ? Impressum : App

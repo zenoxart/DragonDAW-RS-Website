@@ -12,7 +12,33 @@ import { pathToFileURL } from 'node:url'
 import { resolve } from 'node:path'
 
 const root = resolve(import.meta.dirname, '..')
-const { render } = await import(pathToFileURL(resolve(root, 'dist-ssr/entry-server.js')).href)
+const { render, FAQ, LINKS, adVideoUrl } = await import(pathToFileURL(resolve(root, 'dist-ssr/entry-server.js')).href)
+
+// Structured data generated from the site's own content, so it can never drift from the page.
+const SITE = 'https://dragondaw.com'
+const faqText = (f) => (f.email ? `${f.a} ${LINKS.supportEmail}.` : f.a)
+const STRUCTURED = {
+  home: [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: FAQ.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: faqText(f) } })),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'VideoObject',
+      name: 'DragonDaw – the free DAW for beats, recording, mixing & mastering',
+      description: 'A 40-second tour of DragonDaw: start a project in one click, program beats in the step sequencer, record, mix with real routing cables and master your song.',
+      thumbnailUrl: `${SITE}/assets/video-poster.webp`,
+      contentUrl: `${SITE}/${String(adVideoUrl).replace(/^(\.?\/)+/, '')}`,
+      uploadDate: '2026-11-18',
+      duration: 'PT41S',
+      inLanguage: 'en',
+    },
+  ],
+  impressum: [],
+}
+const jsonLd = (items) => items.map((d) => `<script type="application/ld+json">${JSON.stringify(d).replace(/</g, '\\u003c')}</script>`).join('\n')
 
 // Security: Content Security Policy for the built pages (GitHub Pages can't send HTTP headers,
 // so it goes in a <meta> tag). Only this site's own scripts, styles, fonts, images and video;
@@ -52,13 +78,13 @@ for (const page of pages) {
   if (!html.includes('<meta charset="UTF-8">')) throw new Error(`${page.file}: charset meta not found`)
   const out = html
     .replace('<meta charset="UTF-8">', `<meta charset="UTF-8">\n${SECURITY_META}`)
+    .replace('</head>', `${jsonLd(STRUCTURED[page.name])}\n</head>`)
     .replace('<div id="root"></div>', `<div id="root">${body}</div>`)
   await writeFile(path, out)
   console.log(`prerendered ${page.file} (${(body.length / 1024).toFixed(1)} KB of HTML)`)
 }
 
 // sitemap.xml with today's build date, so search engines see when the site last changed
-const SITE = 'https://dragondaw.com'
 const today = new Date().toISOString().slice(0, 10)
 const urls = [
   { loc: `${SITE}/`, priority: '1.0', changefreq: 'daily' }, // download links + counter change often

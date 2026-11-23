@@ -6,7 +6,7 @@ import { useScrollY } from '../hooks'
 export function Brand({ root = '' }) {
   return (
     <a href={root ? root : '#top'} className="brand">
-      <img src={root + IMAGES.mark.replace(/^\.\//, '')} alt="" className="brand-logo" /> Dragon<span>Daw</span>
+      <img src={root + IMAGES.mark.replace(/^\.\//, '')} alt="" className="brand-logo" width="44" height="44" decoding="async" /> Dragon<span>Daw</span>
     </a>
   )
 }

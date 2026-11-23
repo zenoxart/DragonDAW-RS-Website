@@ -1,4 +1,4 @@
-import { FEATURES, STEPS, FAQ, IMAGES, LINKS } from '../content'
+import { FEATURES, FEATURE_LIST, STEPS, FAQ, IMAGES, LINKS } from '../content'
 import { Reveal, Button, Equalizer, CountUp } from './ui'
 import { Brand } from './Nav'
 import { AnimatedNumber } from './DownloadCount'
@@ -44,6 +44,12 @@ export function Features() {
           <Equalizer bars={8} className="meter" />
         </Reveal>
       </div>
+      <Reveal className="inside">
+        <h3 className="inside-title">Everything inside DragonDaw</h3>
+        <ul className="inside-list">
+          {FEATURE_LIST.map((f) => <li key={f}>{f}</li>)}
+        </ul>
+      </Reveal>
     </section>
   )
 }
@@ -64,7 +70,7 @@ export function Workflow() {
           {STEPS.map((s, i) => (
             <Reveal as="li" delay={i} key={s.n}>
               <b>{s.n}</b>
-              <div><h4>{s.title}</h4><p>{s.text}</p></div>
+              <div><h3>{s.title}</h3><p>{s.text}</p></div>
             </Reveal>
           ))}
         </ol>
@@ -137,7 +143,7 @@ export function Cta({ stats, visitor, onDownload }) {
   return (
     <section className="cta" id="download">
       <Reveal className="cta-inner">
-        <img src={IMAGES.logo} alt="DragonDaw logo" className="cta-logo" />
+        <img src={IMAGES.logo} alt="DragonDaw logo" className="cta-logo" width="230" height="230" loading="lazy" decoding="async" />
         <h2>Unleash the <span className="outline">dragon.</span></h2>
         <p>Download DragonDaw and make your next track today. It's free.</p>
         {stats && stats.downloads > 0 && (

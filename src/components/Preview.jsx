@@ -62,6 +62,9 @@ export default function Preview() {
             loop
             playsInline
             preload="metadata"
+            poster="./assets/video-poster.webp"
+            width="1920"
+            height="1080"
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
             onClick={togglePlay}
