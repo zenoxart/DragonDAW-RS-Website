@@ -36,6 +36,7 @@ export const STEPS = [
 
 export const FAQ = [
   { q: 'Is DragonDaw really free?', a: 'Yes. DragonDaw is free and open source, with no subscriptions, trials or locked features.' },
+  { q: 'Are there tutorials?', a: 'Yes. DragonDaw comes with interactive click-through tutorials, and the app itself guides you to its features step by step, so you can start making music right away.' },
   { q: 'Which platforms are supported?', a: 'DragonDaw is developed on Windows first. Check the GitHub repository for the current platform status.' },
   { q: 'Can I contribute?', a: 'Absolutely. Open an issue, discuss an idea or submit a pull request on GitHub.' },
   { q: 'How do I get support?', a: 'Email us at', email: true },
