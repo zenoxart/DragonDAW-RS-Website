@@ -68,6 +68,9 @@ jobs:
           mkdir -p mirror
           gh release download nightly -R "$SRC" -D mirror -p '*.zip' -p '*.tar.gz' -p 'SHA256SUMS*'
           ls -la mirror
+          # Only mirror files that match the release's own checksum list (catches a broken or
+          # tampered transfer); stop without changing the mirror otherwise.
+          (cd mirror && sha256sum -c SHA256SUMS.txt) || { echo "::error::Checksum mismatch - mirror not updated"; exit 1; }
           gh release create "$tag" mirror/* --prerelease --latest=false \
             --title "Download mirror: DragonDaw $version" \
             --notes "Automatic copy of the DragonDAW-RS nightly \`$version\` so downloads on dragondaw.com keep working while the nightly is rebuilt. Source: https://github.com/$SRC/releases/tag/nightly"

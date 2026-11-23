@@ -149,6 +149,7 @@ export function Cta({ stats, visitor, onDownload }) {
             Verify your download: its SHA-256 must match the{' '}
             <a href={checksumUrl(stats.platforms[visitor ?? 'windows'])} target="_blank" rel="noopener noreferrer">checksum list</a>
             {' '}(<code>certutil -hashfile file SHA256</code> on Windows, <code>shasum -a 256 file</code> on macOS/Linux).
+            {' '}Proof it was built from this repo: <code>gh attestation verify file --repo zenoxart/DragonDAW-RS</code>
           </p>
         )}
         <a className="all-releases" href={LINKS.releases} target="_blank" rel="noopener noreferrer">All releases &amp; checksums →</a>
